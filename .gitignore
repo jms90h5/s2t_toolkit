@@ -1,0 +1,7 @@
+models/final.zip
+cpp_implementation/lib/libwenet.so
+cpp_implementation/standalone_cpp
+real_implementation/standalone_real
+real_implementation/__pycache__
+standalone_test
+wenet_build/
