@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Wextra -O2 -I../../../impl/include
+CXXFLAGS = -std=c++14 -Wall -Wextra -O2 -I../../../impl/include -Ishared_include
 LDFLAGS = -L../../../impl/lib -lwenetcpp -pthread
 
 TARGET = standalone_test
@@ -23,7 +23,7 @@ run_with_mock: create_model_dir $(TARGET)
 
 run_with_real: $(TARGET)
 	@echo "Switching to real model implementation..."
-	$(CXX) -std=c++14 -Wall -Wextra -O2 -I../../../impl/include -o $(TARGET) Standalone.cpp $(LDFLAGS)
+	$(CXX) -std=c++14 -Wall -Wextra -O2 -I../../../impl/include -Ishared_include -o $(TARGET) Standalone.cpp $(LDFLAGS)
 	@echo "Running with real model (requires model files in ./models)..."
 	LD_LIBRARY_PATH=../../../impl/lib:$$LD_LIBRARY_PATH ./$(TARGET)
 

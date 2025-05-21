@@ -19,7 +19,7 @@ extern "C" {
 #include "wenet_api.h"
 }
 
-#include "WenetSTTImpl.hpp"
+#include "shared_include/WenetSTTImpl.hpp"
 
 // Implementation that directly uses the WeNet C++ API
 namespace wenet_streams {

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Wextra -O2 -I. -I/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/impl/include
+CXXFLAGS = -std=c++14 -Wall -Wextra -O2 -I. -I/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/impl/include -I../
 LDFLAGS = -L./lib -lwenet -pthread
 
 TARGET = standalone_cpp
@@ -7,8 +7,8 @@ MODEL_DIR = ../models
 
 all: $(TARGET)
 
-$(TARGET): ../Standalone.cpp WenetCppImpl.cpp WenetSTTImpl.hpp
-	$(CXX) $(CXXFLAGS) -o $@ ../Standalone.cpp WenetCppImpl.cpp $(LDFLAGS)
+$(TARGET): ../Standalone.cpp WenetSTTImpl.cpp ../shared_include/WenetSTTImpl.hpp
+	$(CXX) $(CXXFLAGS) -o $@ ../Standalone.cpp WenetSTTImpl.cpp $(LDFLAGS)
 
 run: $(TARGET)
 	LD_LIBRARY_PATH=./lib:$$LD_LIBRARY_PATH ./$(TARGET) --model_path $(MODEL_DIR)

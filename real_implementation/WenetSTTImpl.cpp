@@ -14,7 +14,7 @@
 #include <fstream>
 #include <sstream>
 #include <Python.h>
-#include "WenetSTTImpl.hpp"
+#include "shared_include/WenetSTTImpl.hpp"
 
 // Implementation to use the real PyTorch model with Python bindings
 namespace wenet_streams {

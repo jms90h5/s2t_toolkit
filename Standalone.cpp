@@ -5,7 +5,7 @@
 #include <cmath>
 #include <string>
 
-#include "WenetSTTImpl.hpp"
+#include "shared_include/WenetSTTImpl.hpp"
 
 using namespace wenet_streams;
 
