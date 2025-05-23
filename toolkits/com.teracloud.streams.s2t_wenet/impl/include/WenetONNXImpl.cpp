@@ -84,6 +84,15 @@ WenetONNXImpl::TranscriptionResult WenetONNXImpl::processAudioChunk(
     TranscriptionResult result;
     result.timestamp_ms = timestamp_ms;
     
+    // Check if initialized
+    if (!encoder_session_) {
+        result.text = "";
+        result.is_final = false;
+        result.confidence = 0.0;
+        result.latency_ms = 0;
+        return result;
+    }
+    
     try {
         // 1. Extract Fbank features
         auto features = extractFbankFeatures(samples, num_samples);
@@ -206,6 +215,60 @@ void WenetONNXImpl::reset() {
     feature_buffer_.clear();
     previous_text_.clear();
     hypothesis_scores_.clear();
+}
+
+bool WenetONNXImpl::loadVocabulary(const std::string& path) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open vocabulary file: " << path << std::endl;
+        return false;
+    }
+    
+    std::string token;
+    while (std::getline(file, token)) {
+        vocab_.push_back(token);
+    }
+    
+    std::cout << "Loaded vocabulary with " << vocab_.size() << " tokens" << std::endl;
+    return !vocab_.empty();
+}
+
+bool WenetONNXImpl::loadCMVNStats(const std::string& path) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open CMVN stats file: " << path << std::endl;
+        return false;
+    }
+    
+    std::string line;
+    
+    // Read means
+    if (std::getline(file, line)) {
+        std::istringstream iss(line);
+        float value;
+        while (iss >> value) {
+            cmvn_mean_.push_back(value);
+        }
+    }
+    
+    // Read variances
+    if (std::getline(file, line)) {
+        std::istringstream iss(line);
+        float value;
+        while (iss >> value) {
+            cmvn_var_.push_back(value);
+        }
+    }
+    
+    if (cmvn_mean_.size() != config_.num_mel_bins || 
+        cmvn_var_.size() != config_.num_mel_bins) {
+        std::cerr << "CMVN stats dimension mismatch" << std::endl;
+        // Use defaults if file is invalid
+        cmvn_mean_.assign(config_.num_mel_bins, 0.0f);
+        cmvn_var_.assign(config_.num_mel_bins, 1.0f);
+    }
+    
+    return true;
 }
 
 std::vector<float> WenetONNXImpl::extractFbankFeatures(

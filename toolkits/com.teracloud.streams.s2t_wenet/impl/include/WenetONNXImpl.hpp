@@ -8,7 +8,7 @@
 #include <mutex>
 #include <atomic>
 #include <chrono>
-#include <onnxruntime_cxx_api.h>
+#include "onnxruntime_cxx_api.h"
 
 namespace wenet_streams {
 
