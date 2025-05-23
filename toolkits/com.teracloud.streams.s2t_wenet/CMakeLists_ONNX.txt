@@ -1,0 +1,157 @@
+cmake_minimum_required(VERSION 3.14)
+project(s2t_wenet_onnx VERSION 2.1.0 LANGUAGES CXX)
+
+# C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Options
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(USE_CUDA "Enable CUDA support for ONNX Runtime" OFF)
+option(USE_TENSORRT "Enable TensorRT support" OFF)
+option(BUILD_TESTING "Build tests" ON)
+
+# Find packages
+find_package(Threads REQUIRED)
+
+# Find or download ONNX Runtime
+set(ONNXRUNTIME_ROOT_PATH "" CACHE PATH "Path to ONNX Runtime installation")
+
+if(ONNXRUNTIME_ROOT_PATH)
+    # Use provided ONNX Runtime
+    find_path(ONNXRUNTIME_INCLUDE_DIRS onnxruntime_cxx_api.h
+        PATHS ${ONNXRUNTIME_ROOT_PATH}/include/onnxruntime/core/session
+        NO_DEFAULT_PATH
+    )
+    find_library(ONNXRUNTIME_LIB onnxruntime
+        PATHS ${ONNXRUNTIME_ROOT_PATH}/lib
+        NO_DEFAULT_PATH
+    )
+else()
+    # Try system installation
+    find_path(ONNXRUNTIME_INCLUDE_DIRS onnxruntime_cxx_api.h
+        PATHS /usr/local/include/onnxruntime/core/session
+              /usr/include/onnxruntime/core/session
+    )
+    find_library(ONNXRUNTIME_LIB onnxruntime
+        PATHS /usr/local/lib
+              /usr/lib
+    )
+endif()
+
+if(NOT ONNXRUNTIME_INCLUDE_DIRS OR NOT ONNXRUNTIME_LIB)
+    message(STATUS "ONNX Runtime not found, will download")
+    include(FetchContent)
+    
+    # Download pre-built ONNX Runtime
+    if(WIN32)
+        set(ONNX_RUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v1.16.3/onnxruntime-win-x64-1.16.3.zip")
+    elseif(APPLE)
+        set(ONNX_RUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v1.16.3/onnxruntime-osx-arm64-1.16.3.tgz")
+    else()
+        set(ONNX_RUNTIME_URL "https://github.com/microsoft/onnxruntime/releases/download/v1.16.3/onnxruntime-linux-x64-1.16.3.tgz")
+    endif()
+    
+    FetchContent_Declare(
+        onnxruntime_prebuilt
+        URL ${ONNX_RUNTIME_URL}
+    )
+    FetchContent_MakeAvailable(onnxruntime_prebuilt)
+    
+    set(ONNXRUNTIME_ROOT_PATH ${onnxruntime_prebuilt_SOURCE_DIR})
+    find_path(ONNXRUNTIME_INCLUDE_DIRS onnxruntime_cxx_api.h
+        PATHS ${ONNXRUNTIME_ROOT_PATH}/include/onnxruntime/core/session
+        NO_DEFAULT_PATH
+    )
+    find_library(ONNXRUNTIME_LIB onnxruntime
+        PATHS ${ONNXRUNTIME_ROOT_PATH}/lib
+        NO_DEFAULT_PATH
+    )
+endif()
+
+if(NOT ONNXRUNTIME_INCLUDE_DIRS OR NOT ONNXRUNTIME_LIB)
+    message(FATAL_ERROR "Could not find ONNX Runtime")
+endif()
+
+message(STATUS "Found ONNX Runtime: ${ONNXRUNTIME_LIB}")
+message(STATUS "ONNX Runtime includes: ${ONNXRUNTIME_INCLUDE_DIRS}")
+
+# Create library
+add_library(wenetonnx 
+    impl/include/WenetONNXImpl.cpp
+)
+
+target_include_directories(wenetonnx 
+    PUBLIC 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/impl/include>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${ONNXRUNTIME_INCLUDE_DIRS}/..
+)
+
+target_link_libraries(wenetonnx 
+    PUBLIC 
+        ${ONNXRUNTIME_LIB}
+        Threads::Threads
+)
+
+# Optional: Kaldi native fbank for better feature extraction
+find_path(KALDI_NATIVE_FBANK_INCLUDE kaldi-native-fbank/csrc/feature-fbank.h)
+find_library(KALDI_NATIVE_FBANK_LIB kaldi-native-fbank-core)
+
+if(KALDI_NATIVE_FBANK_INCLUDE AND KALDI_NATIVE_FBANK_LIB)
+    message(STATUS "Found Kaldi native fbank")
+    target_compile_definitions(wenetonnx PRIVATE USE_KALDI_NATIVE_FBANK)
+    target_include_directories(wenetonnx PRIVATE ${KALDI_NATIVE_FBANK_INCLUDE})
+    target_link_libraries(wenetonnx PRIVATE ${KALDI_NATIVE_FBANK_LIB})
+endif()
+
+# CUDA support
+if(USE_CUDA)
+    find_package(CUDA REQUIRED)
+    target_compile_definitions(wenetonnx PRIVATE USE_CUDA)
+    if(WIN32)
+        target_link_libraries(wenetonnx PRIVATE ${ONNXRUNTIME_ROOT_PATH}/lib/onnxruntime_providers_cuda.lib)
+    else()
+        target_link_libraries(wenetonnx PRIVATE ${ONNXRUNTIME_ROOT_PATH}/lib/libonnxruntime_providers_cuda.so)
+    endif()
+endif()
+
+# Tests
+if(BUILD_TESTING)
+    enable_testing()
+    add_executable(test_onnx_impl test/test_onnx_impl.cpp)
+    target_link_libraries(test_onnx_impl PRIVATE wenetonnx)
+    add_test(NAME test_onnx_impl COMMAND test_onnx_impl)
+endif()
+
+# Installation
+include(GNUInstallDirs)
+
+install(TARGETS wenetonnx
+    EXPORT ${PROJECT_NAME}Targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(DIRECTORY impl/include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/wenet_onnx
+    FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
+)
+
+# Export configuration
+install(EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+# Summary
+message(STATUS "")
+message(STATUS "WeNet ONNX Configuration:")
+message(STATUS "  ONNX Runtime: ${ONNXRUNTIME_LIB}")
+message(STATUS "  CUDA support: ${USE_CUDA}")
+message(STATUS "  TensorRT support: ${USE_TENSORRT}")
+message(STATUS "  Kaldi fbank: ${KALDI_NATIVE_FBANK_LIB}")
+message(STATUS "")

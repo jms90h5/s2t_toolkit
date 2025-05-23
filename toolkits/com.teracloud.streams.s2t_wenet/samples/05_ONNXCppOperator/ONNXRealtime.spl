@@ -1,0 +1,122 @@
+namespace com.teracloud.streams.s2t_wenet.samples.onnx;
+
+/**
+ * Real-time speech recognition using the ONNX-based C++ operator
+ * 
+ * This provides the best of both worlds:
+ * - C++ performance (low latency)
+ * - ONNX portability (no WeNet C API dependency)
+ * - Easy model updates (just replace ONNX file)
+ */
+composite ONNXRealtime {
+    param
+        expression<rstring> $modelDir : "./models";
+        expression<rstring> $audioFile : getThisToolkitDir() + "/samples/test_audio.wav";
+        
+    graph
+        // Audio source - in production this would be real-time stream
+        stream<blob audio, uint64 timestamp> AudioStream = FileSource() {
+            param
+                file: $audioFile;
+                format: binary;
+        }
+        
+        // Convert to chunks for real-time simulation
+        stream<blob audio, uint64 timestamp> AudioChunks = Custom(AudioStream) {
+            logic
+                state: {
+                    mutable uint64 currentTime = 0ul;
+                    int32 chunkSamples = 1600; // 100ms at 16kHz
+                }
+                
+                onTuple AudioStream: {
+                    blob fullAudio = audio;
+                    int32 totalSamples = size(fullAudio) / 2; // int16
+                    
+                    // Split into chunks
+                    for (int32 i = 0; i < totalSamples; i += chunkSamples) {
+                        int32 actualChunkSize = min(chunkSamples, totalSamples - i);
+                        blob chunk = fullAudio[i*2:(i+actualChunkSize)*2];
+                        
+                        submit({audio = chunk, timestamp = currentTime}, AudioChunks);
+                        currentTime += 100ul; // 100ms per chunk
+                        
+                        // Simulate real-time delay
+                        block(0.1);
+                    }
+                }
+        }
+        
+        // ONNX-based speech recognition
+        stream<rstring text, boolean isFinal, float64 confidence, 
+                uint64 timestamp, uint64 latencyMs> 
+            Transcription = WenetONNX(AudioChunks) {
+            param
+                encoderModel: $modelDir + "/wenet_encoder.onnx";
+                vocabFile: $modelDir + "/vocab.txt";
+                cmvnFile: $modelDir + "/global_cmvn.stats";
+                sampleRate: 16000;
+                chunkSizeMs: 100;
+                provider: CPU;  // or CUDA for GPU
+                numThreads: 4;
+        }
+        
+        // Display results with performance info
+        () as ResultDisplay = Custom(Transcription) {
+            logic
+                state: {
+                    mutable uint64 resultCount = 0ul;
+                    mutable uint64 totalLatency = 0ul;
+                    mutable uint64 minLatency = 999999ul;
+                    mutable uint64 maxLatency = 0ul;
+                    mutable list<uint64> recentLatencies = [];
+                }
+                
+                onTuple Transcription: {
+                    // Display transcription
+                    printStringLn("[" + (rstring)latencyMs + "ms] " + 
+                                 text + 
+                                 (isFinal ? " (FINAL)" : " ...") +
+                                 " [conf: " + (rstring)(confidence * 100.0) + "%]");
+                    
+                    // Update statistics
+                    resultCount++;
+                    totalLatency += latencyMs;
+                    if (latencyMs < minLatency) minLatency = latencyMs;
+                    if (latencyMs > maxLatency) maxLatency = latencyMs;
+                    
+                    appendM(recentLatencies, latencyMs);
+                    if (size(recentLatencies) > 100) {
+                        recentLatencies = recentLatencies[size(recentLatencies)-100:];
+                    }
+                    
+                    // Show performance summary every 20 results
+                    if (resultCount % 20ul == 0ul) {
+                        // Calculate percentiles
+                        list<uint64> sorted = recentLatencies;
+                        sortM(sorted);
+                        uint64 p50 = sorted[size(sorted) / 2];
+                        uint64 p95 = sorted[size(sorted) * 95 / 100];
+                        uint64 p99 = sorted[size(sorted) * 99 / 100];
+                        
+                        printStringLn("\n=== ONNX C++ Performance ===");
+                        printStringLn("Results: " + (rstring)resultCount);
+                        printStringLn("Average: " + (rstring)(totalLatency/resultCount) + "ms");
+                        printStringLn("Min: " + (rstring)minLatency + "ms");
+                        printStringLn("Max: " + (rstring)maxLatency + "ms");
+                        printStringLn("P50: " + (rstring)p50 + "ms");
+                        printStringLn("P95: " + (rstring)p95 + "ms");
+                        printStringLn("P99: " + (rstring)p99 + "ms");
+                        printStringLn("Target: <150ms for C++ ONNX\n");
+                    }
+                }
+        }
+        
+        // Also write to file for analysis
+        () as FileWriter = FileSink(Transcription) {
+            param
+                file: "onnx_transcription_results.csv";
+                format: csv;
+                quoteStrings: true;
+        }
+}
