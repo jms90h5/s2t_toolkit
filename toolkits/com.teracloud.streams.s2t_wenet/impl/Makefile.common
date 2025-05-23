@@ -1,0 +1,29 @@
+# Common definitions for WeNet ONNX toolkit
+
+# ONNX Runtime location
+# First check environment variable
+ifneq ($(ONNXRUNTIME_ROOT_PATH),)
+    ONNXRUNTIME_ROOT := $(ONNXRUNTIME_ROOT_PATH)
+else
+    # Check if it's in the toolkit deps
+    ONNX_LOCAL := $(TOOLKIT_DIR)/deps/onnxruntime
+    ifneq ($(wildcard $(ONNX_LOCAL)/lib/libonnxruntime.so),)
+        ONNXRUNTIME_ROOT := $(ONNX_LOCAL)
+    else
+        # Otherwise check standard locations
+        ifneq ($(wildcard /usr/local/lib/libonnxruntime.so),)
+            ONNXRUNTIME_ROOT := /usr/local
+        else ifneq ($(wildcard /usr/lib/libonnxruntime.so),)
+            ONNXRUNTIME_ROOT := /usr
+        else
+            $(error ONNX Runtime not found. Run setup_onnx_runtime.sh first)
+        endif
+    endif
+endif
+
+# Compiler settings
+CXX := g++
+CXXFLAGS := -O3 -DNDEBUG
+
+# Export for operator builds
+export ONNXRUNTIME_ROOT
