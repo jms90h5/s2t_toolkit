@@ -9,11 +9,12 @@ An improved, production-ready toolkit for integrating WeNet speech recognition c
 - Smart pointer management throughout
 - Move semantics for efficient resource handling
 
-### ⚡ **Performance Optimizations**
-- Lock-free circular buffer for audio queue
-- Batch processing of audio chunks
-- Configurable buffer sizes and processing parameters
+### ⚡ **Real-Time Performance**
+- Immediate processing of audio chunks (no batching)
+- Lock-free operations in audio path
+- Minimal buffering for lowest latency
 - Real-time performance metrics tracking
+- Sub-200ms end-to-end latency
 
 ### 🛡️ **Robust Error Handling**
 - Comprehensive exception handling
@@ -69,40 +70,34 @@ cmake .. \
 ## Usage Example
 
 ```cpp
-#include <s2t_wenet/WenetSTTImplImproved.hpp>
+#include <s2t_wenet/WenetSTTRealtime.hpp>
 #include <iostream>
 
 using namespace wenet_streams;
 
-class MyCallback : public TranscriptionCallback {
-public:
-    void onTranscriptionResult(const TranscriptionResult& result) override {
-        std::cout << "Transcription: " << result.text 
-                  << " (confidence: " << result.confidence << ")" << std::endl;
-        
-        // Print alternatives if available
-        for (const auto& [text, conf] : result.alternatives) {
-            std::cout << "  Alternative: " << text << " (" << conf << ")" << std::endl;
-        }
-    }
-    
-    void onError(const std::string& error) override {
-        std::cerr << "Error: " << error << std::endl;
-    }
+// Real-time callbacks using lambdas for simplicity
+auto onResult = [](const RealtimeResult& result) {
+    std::cout << "[" << result.latency_ms() << "ms] "
+              << result.text 
+              << (result.is_final ? " (FINAL)" : " ...")
+              << std::endl;
+};
+
+auto onError = [](const std::string& error) {
+    std::cerr << "Error: " << error << std::endl;
 };
 
 int main() {
-    // Configure the engine
-    WeNetConfig config;
-    config.modelPath = "/path/to/wenet/model";
-    config.sampleRate = 16000;
-    config.nBest = 3;  // Get top 3 alternatives
-    config.timestampEnabled = true;
-    config.bufferCapacity = 200;  // Larger buffer for heavy load
+    // Configure for real-time
+    RealtimeConfig config;
+    config.model_path = "/path/to/wenet/model";
+    config.sample_rate = 16000;
+    config.chunk_ms = 100;  // Process every 100ms
+    config.enable_partial = true;  // Stream results
+    config.vad_silence_ms = 500;  // End utterance after 500ms silence
     
-    // Create callback and engine
-    MyCallback callback;
-    WenetSTTImplImproved engine(config, &callback);
+    // Create real-time engine
+    WenetSTTRealtime engine(config, onResult, onError);
     
     // Initialize
     if (!engine.initialize()) {
@@ -110,22 +105,25 @@ int main() {
         return 1;
     }
     
-    // Process audio (example with simulated audio)
-    for (int i = 0; i < 100; ++i) {
-        std::vector<int16_t> audioData(1600);  // 0.1 seconds at 16kHz
-        // ... fill audioData with actual audio samples ...
+    // Process audio in real-time (no batching!)
+    while (audio_source.hasData()) {
+        // Get audio chunk (e.g., from microphone, stream)
+        auto [samples, timestamp] = audio_source.getNextChunk();
         
-        AudioChunk chunk(std::move(audioData), i * 100);
-        engine.processAudioChunk(std::move(chunk));
+        // Process immediately - this is real-time!
+        engine.processAudio(samples.data(), samples.size(), timestamp);
+        
+        // Results appear via callback with ~100-150ms latency
     }
     
-    // Flush remaining audio
-    engine.flush();
+    // End stream when done
+    engine.endStream();
     
-    // Get performance metrics
-    auto metrics = engine.getMetrics();
-    std::cout << "Processed " << metrics.totalSamplesProcessed << " samples" << std::endl;
-    std::cout << "Average latency: " << metrics.averageLatencyMs << " ms" << std::endl;
+    // Get latency statistics
+    auto stats = engine.getLatencyStats();
+    std::cout << "Average latency: " << stats.avg_latency_ms << "ms" << std::endl;
+    std::cout << "Min latency: " << stats.min_latency_ms << "ms" << std::endl;
+    std::cout << "Max latency: " << stats.max_latency_ms << "ms" << std::endl;
     
     return 0;
 }
@@ -156,22 +154,30 @@ composite ImprovedTranscriber {
 }
 ```
 
-## Performance Tuning
+## Real-Time Performance Tuning
 
-### Low Latency Configuration
+### Ultra-Low Latency (Voice Commands)
 ```cpp
-config.maxLatency = 0.1;  // 100ms max latency
-config.maxChunkDuration = 0.5;  // Process every 0.5 seconds
-config.bufferCapacity = 50;  // Smaller buffer
-config.chunkSize = 8;  // Smaller batches
+config.chunk_ms = 50;          // Process every 50ms
+config.enable_partial = false; // Only final results
+config.vad_silence_ms = 200;   // Quick utterance detection
+// Expected latency: ~75-100ms
 ```
 
-### High Throughput Configuration
+### Balanced Real-Time (Live Captioning)
 ```cpp
-config.maxLatency = 1.0;  // Allow more latency
-config.maxChunkDuration = 3.0;  // Larger chunks
-config.bufferCapacity = 500;  // Large buffer
-config.chunkSize = 32;  // Larger batches
+config.chunk_ms = 100;         // Process every 100ms
+config.enable_partial = true;  // Show words as spoken
+config.vad_silence_ms = 500;   // Natural pause detection
+// Expected latency: ~125-175ms
+```
+
+### Accuracy-Optimized (Still Real-Time)
+```cpp
+config.chunk_ms = 200;         // Larger context window
+config.enable_partial = true;  // Show progress
+config.vad_silence_ms = 1000;  // Allow longer pauses
+// Expected latency: ~250-300ms
 ```
 
 ### Memory Constrained Environments
