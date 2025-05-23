@@ -1,0 +1,290 @@
+cmake_minimum_required(VERSION 3.14)
+project(s2t_wenet VERSION 2.0.0 LANGUAGES CXX)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Options
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(WITH_TORCH "Build with PyTorch support" ON)
+option(BUILD_TESTING "Build tests" ON)
+option(MOCK_IMPLEMENTATION "Use mock implementation (without actual WeNet dependencies)" OFF)
+option(ENABLE_SANITIZERS "Enable address and undefined behavior sanitizers" OFF)
+option(BUILD_DOCUMENTATION "Build documentation" OFF)
+option(ENABLE_BENCHMARKS "Build performance benchmarks" OFF)
+
+# Set default build type if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+# Compiler flags
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_options(-g -O0)
+    else()
+        add_compile_options(-O3)
+    endif()
+    
+    # Enable sanitizers if requested
+    if(ENABLE_SANITIZERS)
+        add_compile_options(-fsanitize=address -fsanitize=undefined)
+        add_link_options(-fsanitize=address -fsanitize=undefined)
+    endif()
+endif()
+
+# Find packages using modern CMake
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Create interface library for dependencies
+add_library(s2t_wenet_deps INTERFACE)
+
+# Find dependencies
+find_package(Threads REQUIRED)
+target_link_libraries(s2t_wenet_deps INTERFACE Threads::Threads)
+
+# Find RapidJSON
+find_package(RapidJSON QUIET)
+if(RapidJSON_FOUND)
+    target_include_directories(s2t_wenet_deps INTERFACE ${RAPIDJSON_INCLUDE_DIRS})
+else()
+    message(STATUS "RapidJSON not found, will download")
+    include(FetchContent)
+    FetchContent_Declare(
+        rapidjson
+        GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
+        GIT_TAG v1.1.0
+    )
+    FetchContent_MakeAvailable(rapidjson)
+    target_include_directories(s2t_wenet_deps INTERFACE ${rapidjson_SOURCE_DIR}/include)
+endif()
+
+# Find or download GoogleTest if testing is enabled
+if(BUILD_TESTING)
+    find_package(GTest QUIET)
+    if(NOT GTest_FOUND)
+        message(STATUS "GTest not found, will download")
+        include(FetchContent)
+        FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.12.1
+        )
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(googletest)
+    endif()
+    enable_testing()
+endif()
+
+# Find PyTorch if requested
+if(WITH_TORCH AND NOT MOCK_IMPLEMENTATION)
+    find_package(Torch QUIET)
+    if(Torch_FOUND)
+        target_link_libraries(s2t_wenet_deps INTERFACE ${TORCH_LIBRARIES})
+        target_include_directories(s2t_wenet_deps INTERFACE ${TORCH_INCLUDE_DIRS})
+    else()
+        message(STATUS "PyTorch not found, using mock implementation")
+        set(MOCK_IMPLEMENTATION ON)
+    endif()
+endif()
+
+# Find WeNet
+if(NOT MOCK_IMPLEMENTATION)
+    # Try to find WeNet using pkg-config first
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(WENET wenet)
+    endif()
+    
+    if(NOT WENET_FOUND)
+        # Fall back to manual search
+        set(WENET_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../wenet_build/wenet" CACHE PATH "WeNet root directory")
+        find_path(WENET_INCLUDE_DIR
+            NAMES wenet_api.h
+            PATHS ${WENET_ROOT}/runtime/core/api
+                  ${WENET_ROOT}/core/api
+                  /usr/local/include/wenet
+                  /usr/include/wenet
+        )
+        
+        find_library(WENET_LIBRARY
+            NAMES wenet
+            PATHS ${WENET_ROOT}/runtime/build/lib
+                  ${WENET_ROOT}/build/lib
+                  /usr/local/lib
+                  /usr/lib
+        )
+        
+        if(WENET_INCLUDE_DIR AND WENET_LIBRARY)
+            set(WENET_FOUND TRUE)
+            target_include_directories(s2t_wenet_deps INTERFACE ${WENET_INCLUDE_DIR}/..)
+            target_link_libraries(s2t_wenet_deps INTERFACE ${WENET_LIBRARY})
+        else()
+            message(STATUS "WeNet not found, using mock implementation")
+            set(MOCK_IMPLEMENTATION ON)
+        endif()
+    endif()
+endif()
+
+# Configure compilation based on mock/real implementation
+if(MOCK_IMPLEMENTATION)
+    message(STATUS "Building with mock implementation of WeNet")
+    target_compile_definitions(s2t_wenet_deps INTERFACE MOCK_WENET_IMPLEMENTATION)
+endif()
+
+# Source files
+set(SOURCES
+    impl/include/WenetSTTImpl.cpp
+    impl/include/WenetSTTImplImproved.cpp
+)
+
+# Add mock implementation if needed
+if(MOCK_IMPLEMENTATION)
+    list(APPEND SOURCES impl/include/MockWenetImpl.cpp)
+endif()
+
+# Create the main library
+add_library(wenetcpp ${SOURCES})
+target_include_directories(wenetcpp 
+    PUBLIC 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/impl/include>
+        $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(wenetcpp PUBLIC s2t_wenet_deps)
+
+# Set library properties
+set_target_properties(wenetcpp PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+)
+
+# Generate export header
+include(GenerateExportHeader)
+generate_export_header(wenetcpp
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/wenetcpp_export.h
+)
+target_include_directories(wenetcpp PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+
+# Build tests
+if(BUILD_TESTING)
+    add_executable(wenet_tests 
+        test/WenetTest.cpp
+        test/WenetSTTImplTest.cpp
+    )
+    target_link_libraries(wenet_tests PRIVATE wenetcpp)
+    
+    if(GTest_FOUND)
+        target_link_libraries(wenet_tests PRIVATE GTest::gtest GTest::gtest_main GTest::gmock)
+    else()
+        target_link_libraries(wenet_tests PRIVATE gtest gtest_main gmock)
+    endif()
+    
+    # Add tests to CTest
+    include(GoogleTest)
+    gtest_discover_tests(wenet_tests)
+endif()
+
+# Build benchmarks
+if(ENABLE_BENCHMARKS)
+    find_package(benchmark QUIET)
+    if(benchmark_FOUND)
+        add_executable(wenet_benchmarks test/benchmarks.cpp)
+        target_link_libraries(wenet_benchmarks PRIVATE wenetcpp benchmark::benchmark)
+    else()
+        message(WARNING "Google Benchmark not found, skipping benchmarks")
+    endif()
+endif()
+
+# Documentation
+if(BUILD_DOCUMENTATION)
+    find_package(Doxygen QUIET)
+    if(DOXYGEN_FOUND)
+        set(DOXYGEN_GENERATE_HTML YES)
+        set(DOXYGEN_GENERATE_MAN NO)
+        set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+        doxygen_add_docs(docs
+            ${CMAKE_CURRENT_SOURCE_DIR}/impl/include
+            COMMENT "Generating API documentation with Doxygen"
+        )
+    else()
+        message(WARNING "Doxygen not found, skipping documentation")
+    endif()
+endif()
+
+# Installation
+include(GNUInstallDirs)
+
+# Install the library
+install(TARGETS wenetcpp s2t_wenet_deps
+    EXPORT ${PROJECT_NAME}Targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# Install headers
+install(DIRECTORY impl/include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/s2t_wenet
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+)
+
+# Install export header
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/wenetcpp_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/s2t_wenet
+)
+
+# Create and install CMake config files
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+install(EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+# Create pkg-config file
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
+    @ONLY
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
+
+# Summary
+message(STATUS "")
+message(STATUS "s2t_wenet configuration summary:")
+message(STATUS "  Version: ${PROJECT_VERSION}")
+message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  Mock implementation: ${MOCK_IMPLEMENTATION}")
+message(STATUS "  PyTorch support: ${Torch_FOUND}")
+message(STATUS "  Testing enabled: ${BUILD_TESTING}")
+message(STATUS "  Documentation: ${BUILD_DOCUMENTATION}")
+message(STATUS "  Benchmarks: ${ENABLE_BENCHMARKS}")
+message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "")
