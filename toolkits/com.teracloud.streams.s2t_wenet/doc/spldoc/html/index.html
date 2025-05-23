@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeraCloud Streams S2T WeNet Toolkit Documentation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            background-color: #205081;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav {
+            background-color: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        .nav li {
+            margin-right: 20px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: #205081;
+            font-weight: bold;
+        }
+        h1, h2, h3 {
+            color: #205081;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .code {
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>TeraCloud Streams S2T WeNet Toolkit</h1>
+        <p>Real-time Speech-to-Text transcription using the WeNet framework</p>
+    </div>
+    
+    <div class="container">
+        <div class="nav">
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#operators">Operators</a></li>
+                <li><a href="#types">Types</a></li>
+                <li><a href="#functions">Functions</a></li>
+                <li><a href="#sample">Sample Application</a></li>
+            </ul>
+        </div>
+        
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                The <code>com.teracloud.streams.s2t_wenet</code> toolkit provides real-time speech-to-text capabilities 
+                for TeraCloud Streams applications using the WeNet speech recognition framework. WeNet is a production-first 
+                and production-ready open source speech recognition toolkit that supports both streaming and non-streaming 
+                end-to-end speech recognition.
+            </p>
+            <p>
+                This toolkit includes operators for real-time audio streaming, speech recognition, and result output,
+                enabling the development of high-performance speech recognition applications with minimal latency.
+            </p>
+        </section>
+        
+        <section id="operators">
+            <h2>Operators</h2>
+            
+            <h3>WenetSTT</h3>
+            <p>
+                The core operator that performs real-time speech recognition using the WeNet framework.
+                It processes streaming audio data and outputs transcription results with support for
+                partial (incremental) results and final transcriptions.
+            </p>
+            
+            <h4>Input Ports</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>0 (required)</td>
+                    <td>tuple&lt;blob audioChunk, uint64 timestamp&gt;</td>
+                    <td>Stream of audio chunks for real-time transcription</td>
+                </tr>
+            </table>
+            
+            <h4>Output Ports</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>0 (required)</td>
+                    <td>tuple&lt;rstring text, boolean isFinal, float64 confidence&gt;</td>
+                    <td>Stream of transcription results</td>
+                </tr>
+            </table>
+            
+            <h4>Parameters</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Required</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>modelPath</td>
+                    <td>rstring</td>
+                    <td>Yes</td>
+                    <td>-</td>
+                    <td>Path to the WeNet model directory</td>
+                </tr>
+                <tr>
+                    <td>sampleRate</td>
+                    <td>int32</td>
+                    <td>No</td>
+                    <td>16000</td>
+                    <td>The sample rate of the input audio in Hz</td>
+                </tr>
+                <tr>
+                    <td>partialResultsEnabled</td>
+                    <td>boolean</td>
+                    <td>No</td>
+                    <td>true</td>
+                    <td>Whether to emit partial (incremental) results</td>
+                </tr>
+                <tr>
+                    <td>maxLatency</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>0.3</td>
+                    <td>Maximum latency in seconds for real-time transcription</td>
+                </tr>
+                <tr>
+                    <td>vad</td>
+                    <td>boolean</td>
+                    <td>No</td>
+                    <td>true</td>
+                    <td>Enable Voice Activity Detection</td>
+                </tr>
+                <tr>
+                    <td>vadSilenceThreshold</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>-40.0</td>
+                    <td>Silence threshold for VAD in dB</td>
+                </tr>
+                <tr>
+                    <td>vadSpeechThreshold</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>-10.0</td>
+                    <td>Speech threshold for VAD in dB</td>
+                </tr>
+                <tr>
+                    <td>maxChunkDuration</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>3.0</td>
+                    <td>Maximum duration of audio chunks to process in seconds</td>
+                </tr>
+            </table>
+            
+            <h4>Example</h4>
+            <div class="code">
+<pre>
+stream&lt;blob audioChunk, uint64 timestamp&gt; AudioStream = ...
+
+stream&lt;rstring text, boolean isFinal, float64 confidence&gt; TranscriptionStream = 
+    WenetSTT(AudioStream) {
+    param
+        modelPath: "/path/to/wenet/model";
+        partialResultsEnabled: true;
+        maxLatency: 0.3;
+}
+</pre>
+            </div>
+            
+            <h3>WenetSpeechToText</h3>
+            <p>
+                A higher-level composite operator that wraps the WenetSTT primitive operator,
+                providing a more convenient interface for speech recognition.
+            </p>
+            
+            <h4>Input Ports</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>AudioStream (required)</td>
+                    <td>tuple&lt;blob audioChunk, uint64 timestamp&gt;</td>
+                    <td>Stream of audio chunks for real-time transcription</td>
+                </tr>
+            </table>
+            
+            <h4>Output Ports</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>TranscriptionStream (required)</td>
+                    <td>tuple&lt;rstring text, boolean isFinal, float64 confidence&gt;</td>
+                    <td>Stream of transcription results</td>
+                </tr>
+            </table>
+            
+            <h4>Parameters</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Required</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>modelPath</td>
+                    <td>rstring</td>
+                    <td>Yes</td>
+                    <td>-</td>
+                    <td>Path to the WeNet model directory</td>
+                </tr>
+                <tr>
+                    <td>sampleRate</td>
+                    <td>int32</td>
+                    <td>No</td>
+                    <td>16000</td>
+                    <td>The sample rate of the input audio in Hz</td>
+                </tr>
+                <tr>
+                    <td>partialResultsEnabled</td>
+                    <td>boolean</td>
+                    <td>No</td>
+                    <td>true</td>
+                    <td>Whether to emit partial (incremental) results</td>
+                </tr>
+                <tr>
+                    <td>maxLatency</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>0.3</td>
+                    <td>Maximum latency in seconds for real-time transcription</td>
+                </tr>
+                <tr>
+                    <td>vad</td>
+                    <td>boolean</td>
+                    <td>No</td>
+                    <td>true</td>
+                    <td>Enable Voice Activity Detection</td>
+                </tr>
+                <tr>
+                    <td>vadSilenceThreshold</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>-40.0</td>
+                    <td>Silence threshold for VAD in dB</td>
+                </tr>
+                <tr>
+                    <td>vadSpeechThreshold</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>-10.0</td>
+                    <td>Speech threshold for VAD in dB</td>
+                </tr>
+                <tr>
+                    <td>maxChunkDuration</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>3.0</td>
+                    <td>Maximum duration of audio chunks to process in seconds</td>
+                </tr>
+            </table>
+            
+            <h3>AudioStreamSource</h3>
+            <p>
+                An operator that receives audio data from a WebSocket or other streaming source
+                and produces a stream of audio chunks suitable for real-time speech recognition.
+            </p>
+            
+            <h4>Output Ports</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>AudioStream (required)</td>
+                    <td>tuple&lt;blob audioChunk, uint64 timestamp&gt;</td>
+                    <td>Stream of audio chunks with timestamps</td>
+                </tr>
+            </table>
+            
+            <h4>Parameters</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Required</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>endpoint</td>
+                    <td>rstring</td>
+                    <td>Yes</td>
+                    <td>-</td>
+                    <td>The WebSocket URL or endpoint for audio streaming</td>
+                </tr>
+                <tr>
+                    <td>format</td>
+                    <td>rstring</td>
+                    <td>No</td>
+                    <td>"pcm"</td>
+                    <td>The audio format (pcm, opus, etc.)</td>
+                </tr>
+                <tr>
+                    <td>sampleRate</td>
+                    <td>int32</td>
+                    <td>No</td>
+                    <td>16000</td>
+                    <td>The sample rate of the audio in Hz</td>
+                </tr>
+                <tr>
+                    <td>channelCount</td>
+                    <td>int32</td>
+                    <td>No</td>
+                    <td>1</td>
+                    <td>The number of audio channels (1 for mono, 2 for stereo)</td>
+                </tr>
+                <tr>
+                    <td>chunkSize</td>
+                    <td>int32</td>
+                    <td>No</td>
+                    <td>100</td>
+                    <td>The size of audio chunks in milliseconds</td>
+                </tr>
+                <tr>
+                    <td>reconnect</td>
+                    <td>boolean</td>
+                    <td>No</td>
+                    <td>true</td>
+                    <td>Whether to automatically reconnect on disconnection</td>
+                </tr>
+                <tr>
+                    <td>reconnectInterval</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>5.0</td>
+                    <td>The interval between reconnection attempts in seconds</td>
+                </tr>
+            </table>
+            
+            <h3>WebSocketSink</h3>
+            <p>
+                An operator that sends data to a WebSocket endpoint, useful for streaming
+                transcription results to web clients.
+            </p>
+            
+            <h4>Input Ports</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>In (required)</td>
+                    <td>Any tuple type</td>
+                    <td>Stream of data to send over WebSocket</td>
+                </tr>
+            </table>
+            
+            <h4>Parameters</h4>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Required</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>websocketUrl</td>
+                    <td>rstring</td>
+                    <td>Yes</td>
+                    <td>-</td>
+                    <td>The WebSocket URL to connect to</td>
+                </tr>
+                <tr>
+                    <td>format</td>
+                    <td>rstring</td>
+                    <td>No</td>
+                    <td>"json"</td>
+                    <td>The format to use for serializing tuples (json, xml, csv)</td>
+                </tr>
+                <tr>
+                    <td>reconnect</td>
+                    <td>boolean</td>
+                    <td>No</td>
+                    <td>true</td>
+                    <td>Whether to automatically reconnect on disconnection</td>
+                </tr>
+                <tr>
+                    <td>reconnectInterval</td>
+                    <td>float64</td>
+                    <td>No</td>
+                    <td>5.0</td>
+                    <td>The interval between reconnection attempts in seconds</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section id="types">
+            <h2>Types</h2>
+            <p>
+                The toolkit does not define any specific SPL types beyond the standard types used in the operators.
+            </p>
+        </section>
+        
+        <section id="functions">
+            <h2>Functions</h2>
+            <p>
+                The toolkit provides the following utility functions:
+            </p>
+            
+            <h3>convertToBlob</h3>
+            <p>
+                Converts a string to a blob. This is primarily for demonstration purposes.
+            </p>
+            <table>
+                <tr>
+                    <th>Return Type</th>
+                    <th>Arguments</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>blob</td>
+                    <td>rstring data</td>
+                    <td>Converts the input string to a blob</td>
+                </tr>
+            </table>
+        </section>
+        
+        <section id="sample">
+            <h2>Sample Application</h2>
+            <p>
+                The toolkit includes a sample application called "RealtimeTranscriber" that
+                demonstrates real-time speech recognition using the WeNet toolkit. For details,
+                see the README.md file in the samples/RealtimeTranscriber directory.
+            </p>
+        </section>
+    </div>
+    
+    <div class="footer">
+        <p>TeraCloud Streams S2T WeNet Toolkit v1.0.0</p>
+        <p>Copyright © 2025 TeraCloud Corporation</p>
+    </div>
+</body>
+</html>

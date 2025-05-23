@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>
+        The `WenetSTT` operator provides real-time speech-to-text transcription using the WeNet toolkit.
+        It processes streaming audio data and outputs transcription results with support for partial
+        (incremental) results and final transcriptions.
+      </description>
+      <iconUri>wenetstt_32.gif</iconUri>
+      <executionSettings>
+        <className>WenetSTT</className>
+        <vmArgs/>
+      </executionSettings>
+      <libraryDependencies>
+        <library>
+          <cmn:description>WeNet C++ Library</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../../impl/include</cmn:includePath>
+            <cmn:command></cmn:command>
+            <cmn:libPath>../../../impl/lib</cmn:libPath>
+            <cmn:lib>wenetcpp</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+    </context>
+    
+    <parameters>
+      <parameter>
+        <name>modelPath</name>
+        <description>
+          Path to the WeNet model directory containing model.bin and other required files.
+        </description>
+        <optional>false</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      
+      <parameter>
+        <name>sampleRate</name>
+        <description>
+          The sample rate of the input audio in Hz. Default is 16000 Hz.
+        </description>
+        <optional>true</optional>
+        <type>int32</type>
+        <cardinality>1</cardinality>
+        <defaultValue>16000</defaultValue>
+      </parameter>
+      
+      <parameter>
+        <name>partialResultsEnabled</name>
+        <description>
+          When true, the operator will emit partial (incremental) results as they become available.
+          When false, only final results are emitted. Default is true.
+        </description>
+        <optional>true</optional>
+        <type>boolean</type>
+        <cardinality>1</cardinality>
+        <defaultValue>true</defaultValue>
+      </parameter>
+      
+      <parameter>
+        <name>maxLatency</name>
+        <description>
+          Maximum latency in seconds for real-time transcription. Lower values reduce 
+          latency at the potential cost of accuracy. Default is 0.3 (300ms).
+        </description>
+        <optional>true</optional>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+        <defaultValue>0.3</defaultValue>
+      </parameter>
+      
+      <parameter>
+        <name>vad</name>
+        <description>
+          Enable Voice Activity Detection (VAD) to automatically detect speech segments.
+          Default is true.
+        </description>
+        <optional>true</optional>
+        <type>boolean</type>
+        <cardinality>1</cardinality>
+        <defaultValue>true</defaultValue>
+      </parameter>
+      
+      <parameter>
+        <name>vadSilenceThreshold</name>
+        <description>
+          Silence threshold for VAD in dB. Default is -40.0 dB.
+        </description>
+        <optional>true</optional>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+        <defaultValue>-40.0</defaultValue>
+      </parameter>
+      
+      <parameter>
+        <name>vadSpeechThreshold</name>
+        <description>
+          Speech threshold for VAD in dB. Default is -10.0 dB.
+        </description>
+        <optional>true</optional>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+        <defaultValue>-10.0</defaultValue>
+      </parameter>
+      
+      <parameter>
+        <name>maxChunkDuration</name>
+        <description>
+          Maximum duration of audio chunks to process in seconds. Default is 3.0 seconds.
+        </description>
+        <optional>true</optional>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+        <defaultValue>3.0</defaultValue>
+      </parameter>
+    </parameters>
+    
+    <inputPorts>
+      <inputPortSet>
+        <description>
+          Port that ingests audio chunks for real-time speech-to-text transcription. 
+          Each tuple should contain an audio data chunk and a timestamp.
+        </description>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+    </inputPorts>
+    
+    <outputPorts>
+      <outputPortSet>
+        <description>
+          Port that produces transcription results. Each tuple contains the transcribed text, 
+          whether it's a final result, and the confidence score.
+        </description>
+        <expressionMode>Nonexistent</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>false</rewriteAllowed>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </outputPortSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

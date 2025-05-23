@@ -1,0 +1,8 @@
+/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/build/CMakeFiles/wenetcpp.dir
+/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/build/CMakeFiles/wenet_tests.dir
+/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/build/CMakeFiles/edit_cache.dir
+/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/build/CMakeFiles/rebuild_cache.dir
+/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/build/CMakeFiles/list_install_components.dir
+/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/build/CMakeFiles/install.dir
+/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/build/CMakeFiles/install/local.dir
+/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t_wenet/build/CMakeFiles/install/strip.dir

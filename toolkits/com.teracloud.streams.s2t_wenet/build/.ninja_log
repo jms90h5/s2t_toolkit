@@ -1,0 +1,6 @@
+# ninja log v5
+2	46	1747768795847491343	CMakeFiles/wenetcpp.dir/impl/include/MockWenetImpl.cpp.o	62318a7c6bb7c9d
+2	949	1747768796714526398	CMakeFiles/wenetcpp.dir/impl/include/WenetSTTImpl.cpp.o	eaf41ad2b436079b
+950	1100	1747768796923534849	libwenetcpp.so	a3d181213a9de666
+1118	1218	1747768802790772069	wenet_tests	2a856e1871a7e37b
+2	1116	1747768802613764912	CMakeFiles/wenet_tests.dir/test/WenetTest.cpp.o	43c3cc7cedbc96d8

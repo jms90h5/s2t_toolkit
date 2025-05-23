@@ -1,0 +1,73 @@
+namespace com.teracloud.streams.s2t_wenet;
+
+/**
+ * AudioStreamSource operator for real-time audio streaming input
+ * 
+ * This operator receives audio data from a WebSocket or other streaming source
+ * and produces a stream of audio chunks suitable for real-time speech recognition.
+ * 
+ * @output AudioStream: Stream of audio chunks with timestamps
+ * 
+ * @param endpoint: The WebSocket URL or endpoint to connect to for audio streaming
+ * @param format: The audio format (pcm, opus, etc.)
+ * @param sampleRate: The sample rate of the audio in Hz
+ * @param channelCount: The number of audio channels (1 for mono, 2 for stereo)
+ * @param chunkSize: The size of audio chunks in milliseconds
+ * @param reconnect: Whether to automatically reconnect on disconnection
+ * @param reconnectInterval: The interval between reconnection attempts in seconds
+ */
+public composite AudioStreamSource(output AudioStream) {
+    param
+        expression<rstring> $endpoint;
+        expression<rstring> $format: "pcm";
+        expression<int32> $sampleRate: 16000;
+        expression<int32> $channelCount: 1;
+        expression<int32> $chunkSize: 100; // milliseconds
+        expression<boolean> $reconnect: true;
+        expression<float64> $reconnectInterval: 5.0; // seconds
+    
+    output AudioStream: 
+        blob audioChunk,     // Raw audio data chunk
+        uint64 timestamp;    // Timestamp of the chunk
+        
+    graph
+        // Implementation using a WebSocketSource and format converter
+        
+        // In a real implementation, this would use actual WebSocket ingestion
+        // For demonstration purposes, we'll use a beacon to simulate audio input
+        stream<blob audioChunk, uint64 timestamp> AudioStream = Beacon() {
+            param
+                iterations: 0; // Run indefinitely
+                period: 0.1;   // 100ms periods to match the chunk size
+            output AudioStream:
+                // Generate a placeholder audio chunk (would be real audio in production)
+                audioChunk = (blob)convertToBlob(
+                    "This is a placeholder for real audio data that would come from a WebSocket"
+                ),
+                // Use current time as timestamp
+                timestamp = (uint64)getTimestampInSecs() * 1000UL;
+        }
+        
+        /**
+         * In an actual implementation, this would use:
+         * 
+         * stream<blob audioChunk, uint64 timestamp> AudioStream = WebSocketSource() {
+         *     param
+         *         url: $endpoint;
+         *         // Other parameters for WebSocket configuration
+         *     output AudioStream:
+         *         // Convert raw WebSocket data to audio chunks
+         *         audioChunk = convertToAudioChunk(data, $format, $sampleRate, $channelCount),
+         *         timestamp = getTimestampMs();
+         * }
+         */
+}
+
+/** 
+ * Helper function to convert to blob (for demonstration purposes)
+ */
+stateful blob convertToBlob(rstring data) {
+    mutable blob result;
+    assignFrom(result, data);
+    return result;
+}

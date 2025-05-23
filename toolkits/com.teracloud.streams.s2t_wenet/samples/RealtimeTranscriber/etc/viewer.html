@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Transcription Viewer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 20px;
+        }
+        .status {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            text-align: center;
+        }
+        .status.connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .transcription-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            min-height: 200px;
+        }
+        .final-text {
+            font-weight: bold;
+            color: #212529;
+        }
+        .partial-text {
+            color: #6c757d;
+            font-style: italic;
+        }
+        .settings {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+        }
+        .history {
+            margin-top: 30px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+        }
+        .history-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .confidence {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        .timestamp {
+            font-size: 0.8em;
+            color: #6c757d;
+            float: right;
+        }
+        input[type="text"], button {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-time Speech Transcription</h1>
+        
+        <div id="status" class="status disconnected">
+            Disconnected
+        </div>
+        
+        <div class="settings">
+            <label for="websocket-url">WebSocket URL:</label>
+            <input type="text" id="websocket-url" value="ws://localhost:8080/transcription" style="width: 300px;">
+            <button id="connect-btn">Connect</button>
+            <button id="disconnect-btn" disabled>Disconnect</button>
+        </div>
+        
+        <h2>Current Transcription</h2>
+        <div class="transcription-container">
+            <div id="final-text" class="final-text"></div>
+            <div id="partial-text" class="partial-text"></div>
+        </div>
+        
+        <div class="history">
+            <h2>Transcription History</h2>
+            <div id="history-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+        let finalText = '';
+        let historyItems = [];
+        
+        // DOM elements
+        const statusEl = document.getElementById('status');
+        const finalTextEl = document.getElementById('final-text');
+        const partialTextEl = document.getElementById('partial-text');
+        const historyContainerEl = document.getElementById('history-container');
+        const websocketUrlEl = document.getElementById('websocket-url');
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        
+        // Connect to WebSocket
+        function connect() {
+            const url = websocketUrlEl.value.trim();
+            if (!url) {
+                alert('Please enter a WebSocket URL');
+                return;
+            }
+            
+            try {
+                socket = new WebSocket(url);
+                
+                socket.onopen = function() {
+                    statusEl.textContent = 'Connected';
+                    statusEl.className = 'status connected';
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                };
+                
+                socket.onclose = function() {
+                    statusEl.textContent = 'Disconnected';
+                    statusEl.className = 'status disconnected';
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                };
+                
+                socket.onerror = function(error) {
+                    statusEl.textContent = 'Error: ' + error.message;
+                    statusEl.className = 'status disconnected';
+                };
+                
+                socket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    
+                    // Handle the transcription data
+                    if (data.isFinal) {
+                        // This is a final result
+                        finalText += data.text + ' ';
+                        finalTextEl.textContent = finalText;
+                        partialTextEl.textContent = '';
+                        
+                        // Add to history
+                        addToHistory(data);
+                    } else {
+                        // This is a partial result
+                        partialTextEl.textContent = data.text;
+                    }
+                };
+            } catch (error) {
+                alert('Connection error: ' + error.message);
+            }
+        }
+        
+        // Disconnect from WebSocket
+        function disconnect() {
+            if (socket) {
+                socket.close();
+                socket = null;
+            }
+        }
+        
+        // Add item to history
+        function addToHistory(data) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            
+            item.innerHTML = `
+                <div class="timestamp">${timestamp}</div>
+                <div>${data.text}</div>
+                <div class="confidence">Confidence: ${(data.confidence * 100).toFixed(1)}%</div>
+            `;
+            
+            historyContainerEl.prepend(item);
+            
+            // Limit history to 20 items
+            historyItems.push(item);
+            if (historyItems.length > 20) {
+                const removedItem = historyItems.shift();
+                historyContainerEl.removeChild(removedItem);
+            }
+        }
+        
+        // Event listeners
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        
+        // Auto-connect if URL is available
+        if (websocketUrlEl.value.trim()) {
+            connect();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolkit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.streamsdev.ibm.com/xmlschema/2012/07/tk.xsd">
+  <!--
+     This file defines the namespaces and dependencies in the toolkit.
+     Refer to the SPL Development Guide for details.
+  -->
+  <toolkit_version xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" version="1.0.0"/>
+  <dependency>
+    <!-- This toolkit has no dependencies on other toolkits -->
+  </dependency>
+  <namespace>
+    <!-- Main namespace for WenetSTT operator and related components -->
+    <name>com.teracloud.streams.s2t_wenet</name>
+    <cpp>
+      <header_file_root>.</header_file_root>
+      <implementation_file_root>.</implementation_file_root>
+    </cpp>
+  </namespace>
+</toolkit>
