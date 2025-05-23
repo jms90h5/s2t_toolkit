@@ -28,7 +28,7 @@ public:
         int frame_length = (opts.sample_rate * opts.frame_length_ms) / 1000;
         int frame_shift = (opts.sample_rate * opts.frame_shift_ms) / 1000;
         
-        if (num_samples < frame_length) {
+        if (num_samples < static_cast<size_t>(frame_length)) {
             return std::vector<float>();
         }
         
@@ -42,7 +42,7 @@ public:
             // Compute frame energy
             float energy = 0.0f;
             for (int i = 0; i < frame_length; ++i) {
-                if (start + i < num_samples) {
+                if (static_cast<size_t>(start + i) < num_samples) {
                     energy += audio[start + i] * audio[start + i];
                 }
             }

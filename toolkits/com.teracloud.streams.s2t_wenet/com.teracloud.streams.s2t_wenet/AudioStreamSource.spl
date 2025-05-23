@@ -26,48 +26,16 @@ public composite AudioStreamSource(output AudioStream) {
         expression<boolean> $reconnect: true;
         expression<float64> $reconnectInterval: 5.0; // seconds
     
-    output AudioStream: 
-        blob audioChunk,     // Raw audio data chunk
-        uint64 timestamp;    // Timestamp of the chunk
+    type AudioStream = tuple<blob audioChunk, uint64 audioTimestamp>;
         
     graph
-        // Implementation using a WebSocketSource and format converter
-        
-        // In a real implementation, this would use actual WebSocket ingestion
-        // For demonstration purposes, we'll use a beacon to simulate audio input
-        stream<blob audioChunk, uint64 timestamp> AudioStream = Beacon() {
+        // For now, create a simple mock audio source
+        // In production, this would connect to a real audio stream
+        stream<AudioStream> AudioStream = Beacon() {
             param
-                iterations: 0; // Run indefinitely
-                period: 0.1;   // 100ms periods to match the chunk size
+                period: (float64)$chunkSize / 1000.0;
             output AudioStream:
-                // Generate a placeholder audio chunk (would be real audio in production)
-                audioChunk = (blob)convertToBlob(
-                    "This is a placeholder for real audio data that would come from a WebSocket"
-                ),
-                // Use current time as timestamp
-                timestamp = (uint64)getTimestampInSecs() * 1000UL;
+                audioChunk = createBlob(($sampleRate * $chunkSize / 1000) * 2), // 2 bytes per sample (int16)
+                audioTimestamp = (uint64)(getTimestamp() * 1000.0);
         }
-        
-        /**
-         * In an actual implementation, this would use:
-         * 
-         * stream<blob audioChunk, uint64 timestamp> AudioStream = WebSocketSource() {
-         *     param
-         *         url: $endpoint;
-         *         // Other parameters for WebSocket configuration
-         *     output AudioStream:
-         *         // Convert raw WebSocket data to audio chunks
-         *         audioChunk = convertToAudioChunk(data, $format, $sampleRate, $channelCount),
-         *         timestamp = getTimestampMs();
-         * }
-         */
-}
-
-/** 
- * Helper function to convert to blob (for demonstration purposes)
- */
-stateful blob convertToBlob(rstring data) {
-    mutable blob result;
-    assignFrom(result, data);
-    return result;
 }

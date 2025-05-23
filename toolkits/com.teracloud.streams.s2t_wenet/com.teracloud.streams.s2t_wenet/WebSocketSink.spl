@@ -21,50 +21,12 @@ public composite WebSocketSink(input In) {
         expression<float64> $reconnectInterval: 5.0; // seconds
     
     graph
-        // Implementation using a WebSocket sink
-        
-        // In a real implementation, this would use actual WebSocket output
-        // For demonstration purposes, we'll use a custom sink
-        () as Sink = Custom(In) {
-            logic onTuple In: {
-                // Convert tuple to the specified format
-                mutable rstring serializedData;
-                if ($format == "json") {
-                    // Example JSON serialization (simplified)
-                    serializedData = "{";
-                    boolean first = true;
-                    
-                    // Add each attribute to the JSON
-                    <% 
-                    # This SPL to add attribute serialization would be filled in by the SPL compiler
-                    # For demonstration, we'll use a simple placeholder
-                    %>
-                    
-                    serializedData += "}";
-                } else if ($format == "xml") {
-                    // XML serialization
-                    serializedData = "<data>";
-                    // Add each attribute to the XML
-                    serializedData += "</data>";
-                } else {
-                    // Default to simple text format
-                    serializedData = "Data from tuple";
-                }
-                
-                // In a real implementation, this would send the data over WebSocket
-                printStringLn("Would send to WebSocket: " + serializedData);
-            }
+        // For now, use a simple file sink to demonstrate the concept
+        // In production, this would use an actual WebSocket output operator
+        () as Sink = FileSink(In) {
+            param
+                file: "websocket_output.txt";
+                format: txt;
+                writePunctuations: true;
         }
-        
-        /**
-         * In an actual implementation, this would use:
-         * 
-         * () as Sink = WebSocketSink(In) {
-         *     param
-         *         url: $websocketUrl;
-         *         format: $format;
-         *         reconnect: $reconnect;
-         *         reconnectInterval: $reconnectInterval;
-         * }
-         */
 }

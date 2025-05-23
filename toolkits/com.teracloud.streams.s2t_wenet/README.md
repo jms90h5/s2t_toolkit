@@ -22,17 +22,23 @@ This toolkit is designed for scenarios requiring low-latency speech-to-text capa
 
 ## Key Components
 
-- **WenetSTT**: Primary operator for real-time speech recognition
+- **WenetSTT**: Primary operator for real-time speech recognition using WeNet C++ API
+- **WenetONNX**: New operator for real-time speech recognition using ONNX Runtime (recommended)
 - **AudioStreamSource**: Operator for ingesting streaming audio
-- **Utility functions**: Format converters and transcription enhancement functions
+- **WebSocketSink**: Operator for streaming transcription results
+- **WenetRealtimeSTT**: Composite operator demonstrating real-time STT pipeline
 
 ## Prerequisites
 
 - TeraCloud Streams 7.x
 - C++17 compatible compiler
-- WeNet runtime library dependencies
-- CMake 3.14 or higher for building the toolkit
-- LibTorch (PyTorch C++ libraries) for WeNet
+- For WenetSTT operator:
+  - WeNet runtime library dependencies
+  - CMake 3.14 or higher for building the toolkit
+  - LibTorch (PyTorch C++ libraries) for WeNet
+- For WenetONNX operator (recommended):
+  - ONNX Runtime 1.16.3 or higher
+  - WeNet model exported to ONNX format
 
 ## Installing WeNet Dependencies
 
@@ -92,6 +98,67 @@ WeNet requires the following dependencies:
 - **gflags**: Command line flags library
 - **RapidJSON**: For parsing transcription results
 
+## ONNX Runtime Support (Recommended)
+
+The toolkit now includes a WenetONNX operator that uses ONNX Runtime for inference, eliminating the dependency on WeNet C++ API and LibTorch. This approach offers several advantages:
+
+- **Simplified deployment**: No need for WeNet or PyTorch dependencies
+- **Better performance**: ONNX Runtime optimizations for CPU and GPU
+- **Cross-platform compatibility**: Works on more platforms
+- **Smaller footprint**: Reduced memory and disk usage
+
+### Installing ONNX Runtime
+
+The toolkit includes an automatic setup script:
+
+```bash
+# Install ONNX Runtime (downloads and configures automatically)
+./setup_onnx_runtime.sh
+```
+
+This will download ONNX Runtime 1.16.3 and configure it in the `deps/onnxruntime` directory.
+
+### Exporting WeNet Models to ONNX
+
+To use the WenetONNX operator, you need to export your WeNet model to ONNX format:
+
+```python
+# Example script to export WeNet model to ONNX
+import torch
+import wenet
+
+# Load your WeNet model
+model = wenet.load_model('path/to/wenet/model')
+
+# Export encoder to ONNX
+torch.onnx.export(
+    model.encoder,
+    (example_input, example_input_lengths),
+    "encoder.onnx",
+    input_names=['speech', 'speech_lengths'],
+    output_names=['output'],
+    dynamic_axes={
+        'speech': {0: 'batch', 1: 'time'},
+        'speech_lengths': {0: 'batch'},
+        'output': {0: 'batch', 1: 'time'}
+    }
+)
+```
+
+### Using the WenetONNX Operator
+
+```spl
+stream<rstring text, boolean isFinal, float64 confidence> Transcription = 
+    WenetONNX(AudioStream) {
+        param
+            encoderModel: "models/encoder.onnx";
+            vocabFile: "models/units.txt";
+            cmvnFile: "models/global_cmvn";
+            sampleRate: 16000;
+            provider: "CPU";  // or "CUDA" for GPU
+    }
+```
+
 ## Building the Toolkit
 
 Once WeNet dependencies are installed, you can build the toolkit:
@@ -133,14 +200,17 @@ The build script supports several options:
 
 ### 2. Create a Real-time Transcription Application
 
+#### Using WenetONNX (Recommended)
+
 ```spl
 composite RealtimeTranscriber {
     param
-        expression<rstring> $modelPath: getSubmissionTimeValue("modelPath");
+        expression<rstring> $encoderModel: getSubmissionTimeValue("encoderModel");
+        expression<rstring> $vocabFile: getSubmissionTimeValue("vocabFile");
         expression<rstring> $audioEndpoint: getSubmissionTimeValue("audioEndpoint");
     
     graph
-        stream<blob audioChunk, uint64 timestamp> AudioStream = AudioStreamSource() {
+        stream<blob audio, uint64 audioTimestamp> AudioStream = AudioStreamSource() {
             param
                 endpoint: $audioEndpoint;
                 format: "pcm";
@@ -148,28 +218,51 @@ composite RealtimeTranscriber {
                 channelCount: 1;
         }
         
-        stream<rstring partialText, boolean isFinal, float64 confidence> Transcription = WenetSTT(AudioStream) {
-            param
-                modelPath: $modelPath;
-                partialResultsEnabled: true;
-                maxLatency: 0.3; // 300ms max latency
+        stream<rstring text, boolean isFinal, float64 confidence> Transcription = 
+            WenetONNX(AudioStream) {
+                param
+                    encoderModel: $encoderModel;
+                    vocabFile: $vocabFile;
+                    cmvnFile: getThisToolkitDir() + "/etc/global_cmvn";
+                    sampleRate: 16000;
+                    chunkSizeMs: 100;  // Process every 100ms for low latency
         }
         
-        () as WebSocketSink = WebSocketSink(Transcription) {
+        () as WebSocketOutput = WebSocketSink(Transcription) {
             param
                 websocketUrl: "ws://localhost:8080/transcription";
         }
 }
 ```
 
+#### Using WenetSTT (Legacy)
+
+```spl
+stream<rstring partialText, boolean isFinal, float64 confidence> Transcription = 
+    WenetSTT(AudioStream) {
+        param
+            modelPath: $modelPath;
+            partialResultsEnabled: true;
+            maxLatency: 0.3; // 300ms max latency
+    }
+```
+
 ### 3. Compile and Run the Application
 
 ```bash
 # Compile
-sc -M RealtimeTranscriber -t $STREAMS_INSTALL/toolkits/com.teracloud.streams.s2t_wenet
+sc -M RealtimeTranscriber -t /path/to/com.teracloud.streams.s2t_wenet
 
-# Run
-streamtool submitjob output/RealtimeTranscriber.sab -P modelPath=~/wenet_models/gigaspeech_s3_conformer -P audioEndpoint=ws://audio-source:9000/stream
+# Run with WenetONNX
+streamtool submitjob output/RealtimeTranscriber.sab \
+    -P encoderModel=~/wenet_models/encoder.onnx \
+    -P vocabFile=~/wenet_models/units.txt \
+    -P audioEndpoint=ws://audio-source:9000/stream
+
+# Run with WenetSTT (legacy)
+streamtool submitjob output/RealtimeTranscriber.sab \
+    -P modelPath=~/wenet_models/gigaspeech_s3_conformer \
+    -P audioEndpoint=ws://audio-source:9000/stream
 ```
 
 ## Sample Application
@@ -182,6 +275,33 @@ The toolkit includes a sample real-time transcription application that demonstra
 - Integration with a simple web interface for visualization
 
 The sample is located in the `samples/RealtimeTranscriber` directory.
+
+## Performance and Latency Considerations
+
+### Real-time Processing Requirements
+
+This toolkit is designed for real-time speech recognition with target latencies of 100-200ms. Key considerations:
+
+1. **No Batching**: Audio chunks are processed immediately upon arrival
+2. **Streaming Architecture**: Results are emitted as soon as available
+3. **Configurable Chunk Size**: Default 100ms chunks balance latency vs efficiency
+
+### WenetONNX Performance
+
+The ONNX implementation offers several performance advantages:
+
+- **CPU Optimization**: ONNX Runtime provides optimized kernels for various CPU architectures
+- **GPU Acceleration**: Support for CUDA and TensorRT providers
+- **Memory Efficiency**: Reduced memory footprint compared to PyTorch runtime
+- **Thread Control**: Configurable number of inference threads
+
+### Latency Optimization Tips
+
+1. **Use smaller chunk sizes** (50-100ms) for lower latency
+2. **Enable partial results** to get intermediate transcriptions
+3. **Use GPU acceleration** when available
+4. **Tune the number of threads** based on your CPU cores
+5. **Place operators close to audio source** to minimize network latency
 
 ## Troubleshooting
 
@@ -198,6 +318,16 @@ The sample is located in the `samples/RealtimeTranscriber` directory.
 3. **Library loading errors**:
    - Make sure `LD_LIBRARY_PATH` includes both LibTorch and the toolkit's lib directory
    - Run `ldd /path/to/libwenetcpp.so` to check for missing dependencies
+
+4. **ONNX Runtime not found**:
+   - Run `./setup_onnx_runtime.sh` to install ONNX Runtime
+   - Check that `deps/onnxruntime/lib` exists
+   - Verify `libonnxruntime.so` is in the library path
+
+5. **ONNX model loading errors**:
+   - Ensure the model was exported with correct input/output names
+   - Check that vocabulary and CMVN files match the model
+   - Verify the model supports dynamic batch sizes
 
 ### Verifying Installation
 

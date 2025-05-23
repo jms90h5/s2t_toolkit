@@ -75,7 +75,7 @@
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>AttributeFree</expressionMode>
-        <type>Provider</type>
+        <type>rstring</type>
       </parameter>
       <parameter>
         <name>numThreads</name>

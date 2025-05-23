@@ -176,7 +176,7 @@ WenetONNXImpl::TranscriptionResult WenetONNXImpl::processAudioChunk(
         }
         
         // 10. Keep only recent features for next chunk (sliding window)
-        if (feature_buffer_.size() > config_.num_mel_bins * 50) {  // Keep ~500ms
+        if (feature_buffer_.size() > static_cast<size_t>(config_.num_mel_bins * 50)) {  // Keep ~500ms
             feature_buffer_.erase(
                 feature_buffer_.begin(), 
                 feature_buffer_.begin() + feature_buffer_.size() - config_.num_mel_bins * 30
@@ -260,8 +260,8 @@ bool WenetONNXImpl::loadCMVNStats(const std::string& path) {
         }
     }
     
-    if (cmvn_mean_.size() != config_.num_mel_bins || 
-        cmvn_var_.size() != config_.num_mel_bins) {
+    if (cmvn_mean_.size() != static_cast<size_t>(config_.num_mel_bins) || 
+        cmvn_var_.size() != static_cast<size_t>(config_.num_mel_bins)) {
         std::cerr << "CMVN stats dimension mismatch" << std::endl;
         // Use defaults if file is invalid
         cmvn_mean_.assign(config_.num_mel_bins, 0.0f);
@@ -388,56 +388,5 @@ std::string WenetONNXImpl::ctcDecode(const std::vector<float>& logits,
     return text;
 }
 
-bool WenetONNXImpl::loadVocabulary(const std::string& path) {
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        return false;
-    }
-    
-    std::string token;
-    while (std::getline(file, token)) {
-        vocab_.push_back(token);
-    }
-    
-    std::cout << "Loaded vocabulary with " << vocab_.size() << " tokens" << std::endl;
-    return !vocab_.empty();
-}
-
-bool WenetONNXImpl::loadCMVNStats(const std::string& path) {
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        return false;
-    }
-    
-    // Simple format: first line is means, second line is variances
-    std::string line;
-    
-    // Read means
-    if (std::getline(file, line)) {
-        std::istringstream iss(line);
-        float value;
-        while (iss >> value) {
-            cmvn_mean_.push_back(value);
-        }
-    }
-    
-    // Read variances
-    if (std::getline(file, line)) {
-        std::istringstream iss(line);
-        float value;
-        while (iss >> value) {
-            cmvn_var_.push_back(value);
-        }
-    }
-    
-    if (cmvn_mean_.size() != config_.num_mel_bins || 
-        cmvn_var_.size() != config_.num_mel_bins) {
-        // Use defaults if file is invalid
-        cmvn_mean_.assign(config_.num_mel_bins, 0.0f);
-        cmvn_var_.assign(config_.num_mel_bins, 1.0f);
-    }
-    
-    return true;
-}
 
 } // namespace wenet_streams
