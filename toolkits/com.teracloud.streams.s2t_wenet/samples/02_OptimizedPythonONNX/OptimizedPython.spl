@@ -1,0 +1,270 @@
+namespace com.teracloud.streams.s2t_wenet.samples.optimized;
+
+use com.teracloud.streams.python::Python;
+
+/**
+ * Optimized Python implementation with embedded ONNX Runtime
+ * 
+ * All processing happens in a single Python operator to minimize
+ * inter-operator communication overhead.
+ * 
+ * This approach provides better performance than the prototype
+ * while maintaining Python's flexibility.
+ */
+composite OptimizedPythonONNX {
+    param
+        expression<rstring> $modelPath : "./models";
+        expression<int32> $sampleRate : 16000;
+        expression<int32> $chunkMs : 100;
+        
+    graph
+        // Audio source - simulating real-time chunks
+        stream<blob audio, uint64 timestamp> AudioStream = Custom() {
+            logic
+                state: {
+                    mutable uint64 currentTime = 0ul;
+                    mutable int32 chunkSamples = ($sampleRate * $chunkMs) / 1000;
+                }
+                
+                onProcess: {
+                    // Simulate reading audio chunks
+                    // In production, this would come from microphone/stream
+                    
+                    while (!isShutdown()) {
+                        // Generate or read chunk_samples of audio
+                        blob audioChunk = createBlob(chunkSamples * 2); // int16
+                        
+                        submit({audio = audioChunk, timestamp = currentTime}, AudioStream);
+                        
+                        currentTime += (uint64)$chunkMs;
+                        block(0.1); // Simulate real-time
+                    }
+                }
+        }
+        
+        // Single Python operator for complete pipeline
+        stream<rstring text, boolean isFinal, float64 confidence, 
+                uint64 audioTimestamp, uint64 latencyMs> 
+            Transcription = Python(AudioStream) {
+            param
+                pythonCommand: "python3";
+                initScript: '''
+import os
+import sys
+import time
+import numpy as np
+import onnxruntime as ort
+from collections import deque
+from dataclasses import dataclass
+from typing import List, Tuple, Optional
+
+sys.path.append('${modelPath}/python')
+
+# Import WeNet utilities
+from wenet_utils import (
+    compute_fbank_features,
+    load_cmvn_stats,
+    CTCPrefixBeamSearch,
+    load_vocabulary
+)
+
+@dataclass
+class StreamingState:
+    """Maintains state for streaming ASR"""
+    feature_buffer: deque
+    hypothesis_cache: str
+    context_size: int = 7  # frames of context
+    
+class OptimizedWenetSTT:
+    """Optimized single-operator WeNet implementation"""
+    
+    def __init__(self, model_path: str, sample_rate: int):
+        self.sample_rate = sample_rate
+        
+        # Load models and configs
+        print(f"Loading ONNX model from {model_path}/wenet_encoder.onnx")
+        self.encoder_session = ort.InferenceSession(
+            f"{model_path}/wenet_encoder.onnx",
+            providers=['CPUExecutionProvider']
+        )
+        
+        # Load vocabulary and CMVN stats
+        self.vocab = load_vocabulary(f"{model_path}/vocab.txt")
+        self.cmvn_stats = load_cmvn_stats(f"{model_path}/global_cmvn.stats")
+        
+        # Initialize decoder
+        self.decoder = CTCPrefixBeamSearch(
+            vocab_size=len(self.vocab),
+            beam_size=10,
+            blank_id=0
+        )
+        
+        # Streaming state
+        self.state = StreamingState(
+            feature_buffer=deque(maxlen=50),  # ~500ms buffer
+            hypothesis_cache=""
+        )
+        
+        # Performance tracking
+        self.total_audio_processed = 0
+        self.total_processing_time = 0
+        
+    def process_audio(self, audio_blob, timestamp: int) -> Tuple[str, bool, float, int, int]:
+        """Process audio chunk and return transcription"""
+        process_start = time.time()
+        
+        try:
+            # 1. Convert audio blob to numpy
+            audio_bytes = audio_blob.getData()
+            audio = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32)
+            audio = audio / 32768.0
+            
+            # 2. Extract features
+            features = compute_fbank_features(
+                audio,
+                sample_rate=self.sample_rate,
+                num_mel_bins=80,
+                frame_length=25,
+                frame_shift=10
+            )
+            
+            # 3. Apply CMVN
+            features = (features - self.cmvn_stats['mean']) / self.cmvn_stats['std']
+            
+            # 4. Add to buffer for streaming context
+            for frame in features:
+                self.state.feature_buffer.append(frame)
+            
+            # 5. Prepare input tensor with context
+            input_features = np.array(list(self.state.feature_buffer))
+            if len(input_features) < 5:  # Need minimum frames
+                return "", False, 0.0, timestamp, 0
+            
+            # 6. Run ONNX inference
+            speech_tensor = input_features[np.newaxis, :, :]  # Add batch dim
+            speech_lengths = np.array([len(input_features)], dtype=np.int64)
+            
+            encoder_out, encoder_lens = self.encoder_session.run(
+                ["encoder_out", "encoder_out_lens"],
+                {
+                    "speech": speech_tensor.astype(np.float32),
+                    "speech_lengths": speech_lengths
+                }
+            )
+            
+            # 7. Decode with CTC
+            hypotheses = self.decoder.search(
+                encoder_out[0],  # Remove batch dim
+                encoder_lens[0]
+            )
+            
+            # 8. Extract best hypothesis
+            if hypotheses:
+                best_hyp = hypotheses[0]
+                tokens = best_hyp['tokens']
+                score = best_hyp['score']
+                
+                # Convert to text
+                text = ''.join([self.vocab[tid] for tid in tokens if tid != 0])
+                
+                # Determine if final
+                is_final = (text != self.state.hypothesis_cache and 
+                           len(text) > len(self.state.hypothesis_cache))
+                self.state.hypothesis_cache = text
+                
+                # Calculate confidence
+                confidence = float(np.exp(score / max(len(tokens), 1)))
+            else:
+                text = ""
+                is_final = False
+                confidence = 0.0
+            
+            # 9. Calculate metrics
+            process_end = time.time()
+            latency_ms = int((process_end - process_start) * 1000)
+            
+            # Update stats
+            self.total_audio_processed += len(audio) / self.sample_rate
+            self.total_processing_time += (process_end - process_start)
+            
+            # Log performance periodically
+            if int(self.total_audio_processed) % 10 == 0:
+                rtf = self.total_processing_time / max(self.total_audio_processed, 0.001)
+                print(f"Processed {self.total_audio_processed:.1f}s audio, "
+                      f"RTF: {rtf:.2f}", file=sys.stderr)
+            
+            return text, is_final, confidence, timestamp, latency_ms
+            
+        except Exception as e:
+            print(f"Processing error: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+            return "", False, 0.0, timestamp, 0
+
+# Initialize the STT engine
+print("Initializing optimized WeNet STT...", file=sys.stderr)
+stt_engine = OptimizedWenetSTT('${modelPath}', ${sampleRate})
+print("Initialization complete", file=sys.stderr)
+
+# Main processing function
+def process_audio_chunk(audio_blob, timestamp):
+    """Entry point for Streams operator"""
+    return stt_engine.process_audio(audio_blob, timestamp)
+                ''';
+                
+                stateful: true;
+                outputAttributes: '''
+                    text, isFinal, confidence, audioTimestamp, latencyMs = \
+                        process_audio_chunk(audio, timestamp)
+                ''';
+        }
+        
+        // Results display with latency info
+        () as ResultDisplay = Custom(Transcription) {
+            logic
+                state: {
+                    mutable list<uint64> latencies = [];
+                    mutable uint64 totalResults = 0ul;
+                }
+                
+                onTuple Transcription: {
+                    if (text != "") {
+                        // Display result with latency
+                        printStringLn("[" + (rstring)latencyMs + "ms] " + 
+                                     text + 
+                                     (isFinal ? " (FINAL)" : " ...") +
+                                     " [conf: " + (rstring)(confidence * 100.0) + "%]");
+                        
+                        // Track latencies
+                        appendM(latencies, latencyMs);
+                        totalResults++;
+                        
+                        // Show statistics every 20 results
+                        if (totalResults % 20ul == 0ul) {
+                            uint64 sum = 0ul;
+                            uint64 minLat = 999999ul;
+                            uint64 maxLat = 0ul;
+                            
+                            for (uint64 lat in latencies) {
+                                sum += lat;
+                                if (lat < minLat) minLat = lat;
+                                if (lat > maxLat) maxLat = lat;
+                            }
+                            
+                            printStringLn("\n=== Optimized Python Performance ===");
+                            printStringLn("Total results: " + (rstring)totalResults);
+                            printStringLn("Average latency: " + 
+                                         (rstring)(sum / size(latencies)) + "ms");
+                            printStringLn("Min latency: " + (rstring)minLat + "ms");
+                            printStringLn("Max latency: " + (rstring)maxLat + "ms");
+                            printStringLn("Target: <200ms for optimized Python\n");
+                            
+                            // Keep only recent latencies
+                            if (size(latencies) > 100) {
+                                latencies = latencies[size(latencies)-100:];
+                            }
+                        }
+                    }
+                }
+        }
+}

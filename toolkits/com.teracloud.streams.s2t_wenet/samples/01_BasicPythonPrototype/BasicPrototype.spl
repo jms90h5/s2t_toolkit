@@ -1,0 +1,240 @@
+namespace com.teracloud.streams.s2t_wenet.samples.prototype;
+
+use com.teracloud.streams.python::Python;
+use com.teracloud.streams.onnx::ONNXInference;
+
+/**
+ * Basic Python-based WeNet prototype using separate operators
+ * 
+ * Pipeline: Audio → Python (features) → ONNX (encode) → Python (decode)
+ * 
+ * This approach is best for research and prototyping where you need
+ * maximum flexibility to modify each component independently.
+ */
+composite BasicPythonPrototype {
+    param
+        expression<rstring> $modelPath : "./models";
+        expression<int32> $sampleRate : 16000;
+        
+    graph
+        // Audio source
+        stream<blob audio, uint64 timestamp> AudioStream = FileSource() {
+            param
+                file: "test_audio.wav";
+                format: binary;
+                parsing: fast;
+        }
+        
+        // Step 1: Feature extraction in Python
+        stream<list<float32> features, int32 numFrames, uint64 timestamp> 
+            Features = Python(AudioStream) {
+            param
+                pythonCommand: "python3";
+                initScript: '''
+import sys
+import numpy as np
+import torch
+import torchaudio
+import json
+
+# Add model path to Python path
+sys.path.append('${modelPath}/python')
+
+from wenet_utils import compute_fbank_features, load_cmvn_stats
+
+# Initialize CMVN stats
+cmvn_stats = load_cmvn_stats('${modelPath}/global_cmvn.stats')
+sample_rate = ${sampleRate}
+
+def extract_features(audio_blob, timestamp):
+    """Extract Fbank features from audio blob"""
+    try:
+        # Convert blob to numpy array
+        audio_bytes = audio_blob.getData()
+        audio = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32)
+        audio = audio / 32768.0  # Normalize
+        
+        # Compute Fbank features
+        features = compute_fbank_features(
+            audio, 
+            sample_rate=sample_rate,
+            num_mel_bins=80,
+            frame_length=25,
+            frame_shift=10
+        )
+        
+        # Apply CMVN normalization
+        features = (features - cmvn_stats['mean']) / cmvn_stats['std']
+        
+        # Flatten for transmission
+        num_frames = features.shape[0]
+        features_flat = features.flatten().tolist()
+        
+        return features_flat, num_frames, timestamp
+        
+    except Exception as e:
+        print(f"Feature extraction error: {e}", file=sys.stderr)
+        return [], 0, timestamp
+                ''';
+                
+                stateful: false;
+                outputAttributes: '''
+                    features, numFrames, timestamp = extract_features(audio, timestamp)
+                ''';
+        }
+        
+        // Step 2: Neural network encoding with ONNX
+        stream<list<float32> encoderOut, int32 encoderOutLen> 
+            Encoded = ONNXInference(Features) {
+            param
+                modelPath: "${modelPath}/wenet_encoder.onnx";
+                
+                // Input tensor configuration
+                inputTensors: [
+                    {
+                        name: "speech",
+                        shape: [1, -1, 80],  // [batch, time, features]
+                        data: Features.features
+                    },
+                    {
+                        name: "speech_lengths",
+                        shape: [1],
+                        data: [Features.numFrames]
+                    }
+                ];
+                
+                // Output tensor mapping
+                outputTensors: [
+                    {
+                        name: "encoder_out",
+                        attribute: encoderOut
+                    },
+                    {
+                        name: "encoder_out_lens", 
+                        attribute: encoderOutLen
+                    }
+                ];
+        }
+        
+        // Step 3: CTC decoding in Python
+        stream<rstring text, boolean isFinal, float64 confidence, 
+                uint64 latencyMs> Transcription = Python(Encoded) {
+            param
+                pythonCommand: "python3";
+                initScript: '''
+import sys
+import time
+import numpy as np
+import torch
+from collections import defaultdict
+
+sys.path.append('${modelPath}/python')
+
+from wenet_utils import CTCPrefixBeamSearch, load_vocabulary
+
+# Initialize decoder
+vocab = load_vocabulary('${modelPath}/vocab.txt')
+decoder = CTCPrefixBeamSearch(
+    vocab_size=len(vocab),
+    beam_size=10,
+    blank_id=0
+)
+
+# State for streaming
+hypothesis_cache = defaultdict(str)
+processing_times = []
+
+def decode_output(encoder_out, encoder_out_len, timestamp):
+    """Decode encoder output using CTC beam search"""
+    start_time = time.time()
+    
+    try:
+        # Reshape encoder output
+        hidden_dim = 256  # Must match model
+        encoder_out_array = np.array(encoder_out)
+        encoder_out_tensor = encoder_out_array.reshape(-1, hidden_dim)
+        
+        # Run beam search
+        hypotheses = decoder.search(encoder_out_tensor, encoder_out_len)
+        
+        # Get best hypothesis
+        if hypotheses:
+            best_hyp = hypotheses[0]
+            tokens = best_hyp['tokens']
+            score = best_hyp['score']
+            
+            # Convert tokens to text
+            text = ''.join([vocab[tid] for tid in tokens if tid != 0])
+            
+            # Check if this is final (different from cache)
+            cache_key = timestamp // 1000  # Group by second
+            is_final = text != hypothesis_cache[cache_key]
+            hypothesis_cache[cache_key] = text
+            
+            # Calculate confidence from score
+            confidence = float(np.exp(score / len(tokens))) if tokens else 0.0
+            
+        else:
+            text = ""
+            is_final = False
+            confidence = 0.0
+        
+        # Calculate latency
+        end_time = time.time()
+        latency_ms = int((end_time - start_time) * 1000)
+        
+        return text, is_final, confidence, latency_ms
+        
+    except Exception as e:
+        print(f"Decoding error: {e}", file=sys.stderr)
+        return "", False, 0.0, 0
+                ''';
+                
+                stateful: true;  # Maintains hypothesis cache
+                outputAttributes: '''
+                    text, isFinal, confidence, latencyMs = decode_output(
+                        encoderOut, encoderOutLen, timestamp
+                    )
+                ''';
+        }
+        
+        // Output results
+        () as ResultPrinter = Custom(Transcription) {
+            logic
+                onTuple Transcription: {
+                    if (text != "") {
+                        printStringLn("[" + (rstring)latencyMs + "ms] " + 
+                                     text + 
+                                     (isFinal ? " (FINAL)" : " ...") +
+                                     " [conf: " + (rstring)confidence + "]");
+                    }
+                }
+        }
+        
+        // Metrics collection
+        () as MetricsCollector = Custom(Transcription) {
+            logic
+                state: {
+                    mutable uint64 totalLatency = 0ul;
+                    mutable uint64 resultCount = 0ul;
+                    mutable uint64 minLatency = 999999ul;
+                    mutable uint64 maxLatency = 0ul;
+                }
+                
+                onTuple Transcription: {
+                    totalLatency += latencyMs;
+                    resultCount++;
+                    if (latencyMs < minLatency) minLatency = latencyMs;
+                    if (latencyMs > maxLatency) maxLatency = latencyMs;
+                    
+                    if (resultCount % 10ul == 0ul) {
+                        printStringLn("=== Performance Metrics ===");
+                        printStringLn("Results: " + (rstring)resultCount);
+                        printStringLn("Avg Latency: " + 
+                                     (rstring)(totalLatency / resultCount) + "ms");
+                        printStringLn("Min Latency: " + (rstring)minLatency + "ms");
+                        printStringLn("Max Latency: " + (rstring)maxLatency + "ms");
+                    }
+                }
+        }
+}
