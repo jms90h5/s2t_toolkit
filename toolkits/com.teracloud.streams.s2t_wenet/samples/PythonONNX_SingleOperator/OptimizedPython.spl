@@ -1,4 +1,4 @@
-namespace com.teracloud.streams.s2t_wenet.samples.optimized;
+namespace com.teracloud.streams.s2t_toolkit.samples.optimized;
 
 use com.teracloud.streams.python::Python;
 

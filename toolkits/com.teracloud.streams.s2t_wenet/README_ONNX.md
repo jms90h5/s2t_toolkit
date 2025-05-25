@@ -49,7 +49,7 @@ sudo apt install libonnxruntime-dev
 
 ### Build the toolkit
 ```bash
-cd toolkits/com.teracloud.streams.s2t_wenet
+cd toolkits/com.teracloud.streams.s2t_toolkit
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$(nproc)

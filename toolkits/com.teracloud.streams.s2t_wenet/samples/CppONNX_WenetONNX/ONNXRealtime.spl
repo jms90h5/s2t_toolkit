@@ -1,4 +1,4 @@
-namespace com.teracloud.streams.s2t_wenet.samples.onnx;
+namespace com.teracloud.streams.s2t_toolkit.samples.onnx;
 
 /**
  * Real-time speech recognition using the ONNX-based C++ operator

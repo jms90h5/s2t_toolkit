@@ -1,6 +1,6 @@
-namespace com.teracloud.streams.s2t_wenet;
+namespace com.teracloud.streams.s2t_toolkit;
 
-use com.teracloud.streams.s2t_wenet::WenetSTT;
+use com.teracloud.streams.s2t_toolkit::WenetSTT;
 
 /**
  * WenetSpeechToText operator for real-time speech-to-text transcription

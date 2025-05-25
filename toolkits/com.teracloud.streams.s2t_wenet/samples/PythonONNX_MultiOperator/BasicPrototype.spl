@@ -1,4 +1,4 @@
-namespace com.teracloud.streams.s2t_wenet.samples.prototype;
+namespace com.teracloud.streams.s2t_toolkit.samples.prototype;
 
 use com.teracloud.streams.python::Python;
 use com.teracloud.streams.onnx::ONNXInference;

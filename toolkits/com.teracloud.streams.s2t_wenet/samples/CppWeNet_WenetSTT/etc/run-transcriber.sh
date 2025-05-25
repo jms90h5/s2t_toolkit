@@ -26,7 +26,7 @@ SAMPLE_DIR="$(dirname "$SCRIPT_DIR")"
 if [ ! -f "$SAMPLE_DIR/output/RealtimeTranscriber.sab" ]; then
     echo "Compiling RealtimeTranscriber application..."
     cd "$SAMPLE_DIR"
-    sc -M com.teracloud.streams.s2t_wenet.sample::RealtimeTranscriber -t $STREAMS_INSTALL/toolkits:../../
+    sc -M com.teracloud.streams.s2t_toolkit.sample::RealtimeTranscriber -t $STREAMS_INSTALL/toolkits:../../
     if [ $? -ne 0 ]; then
         echo "Compilation failed. Please check the output for errors."
         exit 1
@@ -35,7 +35,7 @@ fi
 
 # Submit the job to Streams
 echo "Submitting RealtimeTranscriber job to Streams..."
-streamtool submitjob "$SAMPLE_DIR/output/com.teracloud.streams.s2t_wenet.sample.RealtimeTranscriber.sab" \
+streamtool submitjob "$SAMPLE_DIR/output/com.teracloud.streams.s2t_toolkit.sample.RealtimeTranscriber.sab" \
     -P modelPath="$MODEL_PATH" \
     -P audioEndpoint="$AUDIO_ENDPOINT" \
     -P outputEndpoint="$OUTPUT_ENDPOINT"

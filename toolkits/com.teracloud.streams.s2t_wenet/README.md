@@ -1,10 +1,10 @@
-# TeraCloud Streams Speech-to-Text Toolkit with WeNet
+# TeraCloud Streams Speech-to-Text Toolkit
 
-This toolkit integrates [WeNet](https://github.com/wenet-e2e/wenet) (an open-source End-to-End Speech Recognition Toolkit) with TeraCloud Streams. It provides a high-performance C++ primitive operator that leverages WeNet's capabilities for real-time speech recognition in streaming applications.
+This toolkit provides high-performance speech-to-text capabilities for TeraCloud Streams applications. It offers multiple implementation approaches including [WeNet](https://github.com/wenet-e2e/wenet) integration and ONNX Runtime-based solutions, enabling real-time speech recognition with various deployment options.
 
 ## Overview
 
-The `com.teracloud.streams.s2t_wenet` toolkit enables:
+The `com.teracloud.streams.s2t_toolkit` toolkit enables:
 
 - Real-time speech-to-text processing with low latency
 - Support for streaming audio input formats
@@ -304,7 +304,7 @@ stream<rstring partialText, boolean isFinal, float64 confidence> Transcription =
 
 ```bash
 # Compile (the -t flag includes the toolkit and all its dependencies)
-sc -M RealtimeTranscriber -t /path/to/com.teracloud.streams.s2t_wenet
+sc -M RealtimeTranscriber -t /path/to/com.teracloud.streams.s2t_toolkit
 
 # The resulting .sab file contains all necessary libraries - no additional 
 # installation needed on runtime nodes!

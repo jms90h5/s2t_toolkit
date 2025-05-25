@@ -1,4 +1,4 @@
-namespace com.teracloud.streams.s2t_wenet;
+namespace com.teracloud.streams.s2t_toolkit;
 
 /**
  * Real-time Speech-to-Text operator using WeNet

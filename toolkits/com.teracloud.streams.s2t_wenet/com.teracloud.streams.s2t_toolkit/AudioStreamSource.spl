@@ -1,4 +1,4 @@
-namespace com.teracloud.streams.s2t_wenet;
+namespace com.teracloud.streams.s2t_toolkit;
 
 /**
  * AudioStreamSource operator for real-time audio streaming input
