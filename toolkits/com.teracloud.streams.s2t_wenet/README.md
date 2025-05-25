@@ -323,16 +323,25 @@ streamtool submitjob output/RealtimeTranscriber.sab \
 
 **Note**: The toolkit is self-contained. After building the toolkit, all dependencies (ONNX Runtime, kaldi-native-fbank, etc.) are packaged with your application. You don't need to install these libraries on your Streams runtime nodes.
 
-## Sample Application
+## Sample Applications
 
-The toolkit includes a sample real-time transcription application that demonstrates:
+The toolkit includes multiple sample applications demonstrating different implementation approaches:
 
-- Streaming audio ingestion from a WebSocket source
+### Sample Naming Convention
+Samples follow the pattern: `<Language><Technology>_<OperatorName>/`
+
+- **PythonONNX_MultiOperator**: Python with ONNX Runtime (multi-operator approach)
+- **PythonONNX_SingleOperator**: Python with ONNX Runtime (single operator, optimized)
+- **CppONNX_WenetONNX**: C++ using the WenetONNX operator (ONNX Runtime)
+- **CppWeNet_WenetSTT**: C++ using the WenetSTT operator (full WeNet runtime)
+
+Each sample demonstrates:
+- Streaming audio ingestion
 - Real-time transcription with incremental results
-- Configuring WeNet for optimal latency-accuracy tradeoff
-- Integration with a simple web interface for visualization
+- Different latency-accuracy tradeoffs
+- Integration patterns for production use
 
-The sample is located in the `samples/RealtimeTranscriber` directory.
+See `samples/README.md` for detailed descriptions of each approach.
 
 ## Performance and Latency Considerations
 

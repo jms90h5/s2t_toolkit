@@ -1,118 +1,88 @@
-# WeNet Speech-to-Text Samples
+# WeNet Speech-to-Text Toolkit Samples
 
-This toolkit provides three implementation approaches for WeNet STT, each with different trade-offs between ease of development and performance.
+This directory contains sample applications demonstrating different approaches to implementing real-time speech-to-text using the WeNet toolkit with TeraCloud Streams.
 
-## Implementation Approaches
+## Sample Applications
 
-### 1. 🐍 Python Prototype (`01_BasicPythonPrototype/`)
-- **Architecture**: Python → ONNX → Python
+### Python-based Implementations
+
+#### PythonONNX_MultiOperator
+- **Technology**: Python with ONNX Runtime (multi-operator approach)
+- **Operator**: Custom Python operators
+- **Use Case**: Research and prototyping where component flexibility is needed
 - **Latency**: ~200-300ms
-- **Use Case**: Rapid prototyping, research
-- **Pros**: Easy to modify, debug, experiment
-- **Cons**: Higher latency, more overhead
+- **Key Features**: Separate operators for feature extraction, encoding, and decoding
 
-### 2. 🚀 Optimized Python (`02_OptimizedPythonONNX/`)
-- **Architecture**: Single Python operator with ONNX Runtime
+#### PythonONNX_SingleOperator
+- **Technology**: Python with embedded ONNX Runtime (single operator)
+- **Operator**: Custom Python operator with all processing embedded
+- **Use Case**: Production scenarios where Python is acceptable
 - **Latency**: ~150-200ms
-- **Use Case**: Production where Python is acceptable
-- **Pros**: Good balance of performance and maintainability
-- **Cons**: Still has Python overhead
+- **Key Features**: Better performance through reduced inter-operator communication
 
-### 3. ⚡ Production C++ (`03_ProductionCppRealtime/`)
-- **Architecture**: Pure C++ with ONNX Runtime
+### C++-based Implementations
+
+#### CppONNX_WenetONNX
+- **Technology**: Pure C++ with ONNX Runtime
+- **Operator**: `WenetONNX` (toolkit primitive operator)
+- **Use Case**: Production real-time systems requiring low latency
 - **Latency**: ~100-150ms
-- **Use Case**: Production real-time systems
-- **Pros**: Lowest latency, highest throughput
-- **Cons**: Harder to develop and debug
+- **Key Features**:
+  - Uses kaldi-native-fbank for feature extraction
+  - Supports CPU/CUDA/TensorRT providers
+  - Self-contained deployment (no WeNet runtime needed)
 
-### 4. 📊 Performance Comparison (`04_PerformanceComparison/`)
-- Runs all three implementations side-by-side
-- Measures latency, throughput, and accuracy
-- Helps choose the right approach for your use case
+#### CppWeNet_WenetSTT
+- **Technology**: C++ with full WeNet runtime
+- **Operator**: `WenetSTT` (toolkit primitive operator)
+- **Use Case**: Applications requiring full WeNet features
+- **Latency**: ~100-150ms
+- **Key Features**:
+  - Complete WeNet implementation
+  - Advanced features like VAD
+  - WebSocket I/O for streaming
 
-## Quick Start
+## Choosing the Right Implementation
 
-### Prerequisites
+### Use Python implementations when:
+- Prototyping new features
+- Integration with Python ML ecosystem is needed
+- Latency requirements are moderate (150-300ms)
+- Development speed is prioritized
+
+### Use CppONNX_WenetONNX when:
+- Low latency is critical (<150ms)
+- Deployment simplicity is important
+- Cross-platform compatibility is needed
+- GPU acceleration is required
+
+### Use CppWeNet_WenetSTT when:
+- Full WeNet features are needed
+- Already have WeNet infrastructure
+- Need advanced features like built-in VAD
+- Willing to manage WeNet dependencies
+
+## Documentation
+
+See the `docs/` directory for design guides and best practices:
+- **RealtimeDesignGuide**: Explains why batching is inappropriate for real-time STT
+
+## Building and Running Samples
+
+Each sample directory contains:
+- `README.md`: Specific instructions for that sample
+- `Makefile`: Build configuration
+- `*.spl`: Streams application source
+
+General build pattern:
 ```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Download models
-./download_models.sh
-
-# Build C++ components
-./build.sh
+cd <sample_directory>
+make
 ```
 
-### Running the Samples
-
-#### Python Prototype
+Run pattern:
 ```bash
-cd 01_BasicPythonPrototype
-streamtool submitjob -P modelPath=../models/wenet BasicPrototype.spl
+streamtool submitjob output/<app_name>.sab
 ```
 
-#### Optimized Python
-```bash
-cd 02_OptimizedPythonONNX
-streamtool submitjob -P modelPath=../models/wenet OptimizedPython.spl
-```
-
-#### Production C++
-```bash
-cd 03_ProductionCppRealtime
-streamtool submitjob -P modelPath=../models/wenet ProductionRealtime.spl
-```
-
-## Choosing the Right Approach
-
-| Criteria | Python Prototype | Optimized Python | Production C++ |
-|----------|-----------------|------------------|----------------|
-| Development Time | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-| Debugging | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-| Latency | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Throughput | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Flexibility | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-| Maintenance | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
-
-### Decision Tree
-```
-Need < 150ms latency?
-├─ Yes → Use Production C++
-└─ No → Need to modify/experiment frequently?
-    ├─ Yes → Use Python Prototype
-    └─ No → Use Optimized Python
-```
-
-## Model Requirements
-
-All implementations use the same WeNet ONNX model:
-- Input: Fbank features (80-dim)
-- Output: Encoder states
-- Vocabulary: Character-based or BPE
-
-See `models/README.md` for model export instructions.
-
-## Performance Benchmarks
-
-Typical results on standard hardware:
-
-| Implementation | Latency (p50) | Latency (p99) | Throughput |
-|----------------|---------------|---------------|------------|
-| Python Prototype | 250ms | 350ms | 0.8x RT |
-| Optimized Python | 175ms | 225ms | 1.2x RT |
-| Production C++ | 125ms | 150ms | 2.0x RT |
-
-*RT = Real Time (1x = processes 1 second of audio in 1 second)*
-
-## Contributing
-
-When adding new implementations:
-1. Create a new numbered directory
-2. Include a README with approach details
-3. Add performance metrics to comparison
-4. Update this guide
-
-## License
-
-All samples share the same license as the toolkit.
+Refer to individual sample READMEs for specific parameters and configuration.
