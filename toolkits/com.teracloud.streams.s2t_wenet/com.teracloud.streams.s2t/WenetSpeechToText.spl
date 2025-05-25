@@ -1,0 +1,47 @@
+namespace com.teracloud.streams.s2t;
+
+use com.teracloud.streams.s2t::WenetSTT;
+
+/**
+ * WenetSpeechToText operator for real-time speech-to-text transcription
+ * 
+ * This operator provides a high-level SPL wrapper around the C++ primitive WenetSTT operator.
+ * It transcribes streaming audio data into text in real-time, with support for partial and final results.
+ * 
+ * @input AudioStream: Stream of audio chunks with timestamps
+ * @output TranscriptionStream: Stream of transcription results
+ * 
+ * @param modelPath: Path to the WeNet model directory
+ * @param sampleRate: The sample rate of the input audio in Hz
+ * @param partialResultsEnabled: Whether to emit partial results as they become available
+ * @param maxLatency: Maximum latency in seconds for real-time transcription
+ * @param vad: Enable Voice Activity Detection
+ * @param vadSilenceThreshold: Silence threshold for VAD in dB
+ * @param vadSpeechThreshold: Speech threshold for VAD in dB
+ * @param maxChunkDuration: Maximum duration of audio chunks to process in seconds
+ */
+public composite WenetSpeechToText(input AudioStream; output TranscriptionStream) {
+    param
+        expression<rstring> $modelPath;
+        expression<int32> $sampleRate: 16000;
+        expression<boolean> $partialResultsEnabled: true;
+        expression<float64> $maxLatency: 0.3;
+        expression<boolean> $vad: true;
+        expression<float64> $vadSilenceThreshold: -40.0;
+        expression<float64> $vadSpeechThreshold: -10.0;
+        expression<float64> $maxChunkDuration: 3.0;
+    
+    graph
+        stream<rstring text, boolean isFinal, float64 confidence> TranscriptionStream = 
+            WenetSTT(AudioStream) {
+            param
+                modelPath: $modelPath;
+                sampleRate: $sampleRate;
+                partialResultsEnabled: $partialResultsEnabled;
+                maxLatency: $maxLatency;
+                vad: $vad;
+                vadSilenceThreshold: $vadSilenceThreshold;
+                vadSpeechThreshold: $vadSpeechThreshold;
+                maxChunkDuration: $maxChunkDuration;
+        }
+}

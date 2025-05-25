@@ -1,6 +1,6 @@
-namespace com.teracloud.streams.s2t_toolkit.sample;
+namespace com.teracloud.streams.s2t.sample;
 
-use com.teracloud.streams.s2t_toolkit::*;
+use com.teracloud.streams.s2t::*;
 
 /**
  * RealtimeTranscriber - Sample application for real-time speech-to-text with WeNet.

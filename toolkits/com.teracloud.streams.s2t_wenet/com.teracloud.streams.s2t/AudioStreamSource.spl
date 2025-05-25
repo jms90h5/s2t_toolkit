@@ -1,0 +1,41 @@
+namespace com.teracloud.streams.s2t;
+
+/**
+ * AudioStreamSource operator for real-time audio streaming input
+ * 
+ * This operator receives audio data from a WebSocket or other streaming source
+ * and produces a stream of audio chunks suitable for real-time speech recognition.
+ * 
+ * @output AudioStream: Stream of audio chunks with timestamps
+ * 
+ * @param endpoint: The WebSocket URL or endpoint to connect to for audio streaming
+ * @param format: The audio format (pcm, opus, etc.)
+ * @param sampleRate: The sample rate of the audio in Hz
+ * @param channelCount: The number of audio channels (1 for mono, 2 for stereo)
+ * @param chunkSize: The size of audio chunks in milliseconds
+ * @param reconnect: Whether to automatically reconnect on disconnection
+ * @param reconnectInterval: The interval between reconnection attempts in seconds
+ */
+public composite AudioStreamSource(output AudioStream) {
+    param
+        expression<rstring> $endpoint;
+        expression<rstring> $format: "pcm";
+        expression<int32> $sampleRate: 16000;
+        expression<int32> $channelCount: 1;
+        expression<int32> $chunkSize: 100; // milliseconds
+        expression<boolean> $reconnect: true;
+        expression<float64> $reconnectInterval: 5.0; // seconds
+    
+    type AudioStream = tuple<blob audioChunk, uint64 audioTimestamp>;
+        
+    graph
+        // For now, create a simple mock audio source
+        // In production, this would connect to a real audio stream
+        stream<AudioStream> AudioStream = Beacon() {
+            param
+                period: (float64)$chunkSize / 1000.0;
+            output AudioStream:
+                audioChunk = createBlob(($sampleRate * $chunkSize / 1000) * 2), // 2 bytes per sample (int16)
+                audioTimestamp = (uint64)(getTimestamp() * 1000.0);
+        }
+}

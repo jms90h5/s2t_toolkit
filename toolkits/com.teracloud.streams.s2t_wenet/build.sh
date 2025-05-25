@@ -30,7 +30,7 @@ cp "${ONNXRUNTIME_ROOT_PATH}/lib/libonnxruntime.so"* "${SCRIPT_DIR}/impl/lib/" |
 
 # 5. Build SPL toolkit
 echo "Building SPL toolkit..."
-cd "${SCRIPT_DIR}/com.teracloud.streams.s2t_toolkit"
+cd "${SCRIPT_DIR}/com.teracloud.streams.s2t"
 
 if [ -z "$STREAMS_INSTALL" ]; then
     echo "Error: STREAMS_INSTALL not set"

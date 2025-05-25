@@ -132,7 +132,7 @@ int main() {
 ## SPL Integration
 
 ```spl
-namespace com.teracloud.streams.s2t_toolkit;
+namespace com.teracloud.streams.s2t;
 
 composite ImprovedTranscriber {
     param

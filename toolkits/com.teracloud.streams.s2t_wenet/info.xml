@@ -2,7 +2,7 @@
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" 
                        xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
-    <info:name>com.teracloud.streams.s2t_toolkit</info:name>
+    <info:name>com.teracloud.streams.s2t</info:name>
     <info:description>
 This toolkit provides integration with the WeNet speech recognition framework,
 enabling real-time streaming speech-to-text capabilities for TeraCloud Streams applications.

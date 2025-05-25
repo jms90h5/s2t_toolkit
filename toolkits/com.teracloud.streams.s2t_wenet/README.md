@@ -4,7 +4,7 @@ This toolkit provides high-performance speech-to-text capabilities for TeraCloud
 
 ## Overview
 
-The `com.teracloud.streams.s2t_toolkit` toolkit enables:
+The `com.teracloud.streams.s2t` toolkit enables:
 
 - Real-time speech-to-text processing with low latency
 - Support for streaming audio input formats
@@ -304,7 +304,7 @@ stream<rstring partialText, boolean isFinal, float64 confidence> Transcription =
 
 ```bash
 # Compile (the -t flag includes the toolkit and all its dependencies)
-sc -M RealtimeTranscriber -t /path/to/com.teracloud.streams.s2t_toolkit
+sc -M RealtimeTranscriber -t /path/to/com.teracloud.streams.s2t
 
 # The resulting .sab file contains all necessary libraries - no additional 
 # installation needed on runtime nodes!

@@ -1,0 +1,32 @@
+namespace com.teracloud.streams.s2t;
+
+/**
+ * WebSocketSink operator for sending data to a WebSocket endpoint
+ * 
+ * This operator sends data to a WebSocket endpoint, useful for streaming
+ * transcription results to web clients.
+ * 
+ * @input In: Stream of data to send over WebSocket
+ * 
+ * @param websocketUrl: The WebSocket URL to connect to
+ * @param format: The format to use for serializing tuples (json, xml, csv)
+ * @param reconnect: Whether to automatically reconnect on disconnection
+ * @param reconnectInterval: The interval between reconnection attempts in seconds
+ */
+public composite WebSocketSink(input In) {
+    param
+        expression<rstring> $websocketUrl;
+        expression<rstring> $format: "json";
+        expression<boolean> $reconnect: true;
+        expression<float64> $reconnectInterval: 5.0; // seconds
+    
+    graph
+        // For now, use a simple file sink to demonstrate the concept
+        // In production, this would use an actual WebSocket output operator
+        () as Sink = FileSink(In) {
+            param
+                file: "websocket_output.txt";
+                format: txt;
+                writePunctuations: true;
+        }
+}

@@ -37,7 +37,7 @@ Navigate to the sample directory and compile:
 
 ```bash
 cd samples/RealtimeTranscriber
-sc -M com.teracloud.streams.s2t_toolkit.sample::RealtimeTranscriber -t $STREAMS_INSTALL/toolkits:../../
+sc -M com.teracloud.streams.s2t.sample::RealtimeTranscriber -t $STREAMS_INSTALL/toolkits:../../
 ```
 
 ## Running the Sample
