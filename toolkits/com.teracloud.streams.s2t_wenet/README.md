@@ -343,32 +343,23 @@ Each sample demonstrates:
 
 See `samples/README.md` for detailed descriptions of each approach.
 
-## Performance and Latency Considerations
+## Performance and Latency
 
-### Real-time Processing Requirements
+This toolkit is designed for real-time speech recognition with target latencies of 100-200ms:
 
-This toolkit is designed for real-time speech recognition with target latencies of 100-200ms. Key considerations:
+| Implementation | Latency | Best For |
+|----------------|---------|----------|
+| **WenetONNX** (C++ ONNX) | ~100-150ms | Production deployments requiring portability |
+| **WenetSTT** (C++ WeNet) | ~100-150ms | Full WeNet features and existing infrastructure |
+| **Python ONNX** | ~150-300ms | Prototyping and research |
 
-1. **No Batching**: Audio chunks are processed immediately upon arrival
-2. **Streaming Architecture**: Results are emitted as soon as available
-3. **Configurable Chunk Size**: Default 100ms chunks balance latency vs efficiency
+### Key Design Principles
 
-### WenetONNX Performance
+1. **No Batching**: Audio processed immediately for lowest latency
+2. **Streaming Architecture**: Incremental results as soon as available
+3. **Configurable Performance**: Tune chunk size, threads, and hardware acceleration
 
-The ONNX implementation offers several performance advantages:
-
-- **CPU Optimization**: ONNX Runtime provides optimized kernels for various CPU architectures
-- **GPU Acceleration**: Support for CUDA and TensorRT providers
-- **Memory Efficiency**: Reduced memory footprint compared to PyTorch runtime
-- **Thread Control**: Configurable number of inference threads
-
-### Latency Optimization Tips
-
-1. **Use smaller chunk sizes** (50-100ms) for lower latency
-2. **Enable partial results** to get intermediate transcriptions
-3. **Use GPU acceleration** when available
-4. **Tune the number of threads** based on your CPU cores
-5. **Place operators close to audio source** to minimize network latency
+For detailed performance tuning, see [docs/IMPLEMENTATION_DETAILS.md](docs/IMPLEMENTATION_DETAILS.md).
 
 ## Troubleshooting
 
@@ -426,6 +417,14 @@ ldd impl/lib/libwenetonnx.so | grep kaldi-native-fbank
 # Check library dependencies
 ldd impl/lib/libwenetcpp.so
 ```
+
+## Additional Documentation
+
+- [Implementation Details](docs/IMPLEMENTATION_DETAILS.md) - Technical details of each operator implementation
+- [ONNX Architecture](docs/ONNX_ARCHITECTURE.md) - Deep dive into the ONNX-based implementation
+- [Version 2.0 Improvements](docs/IMPROVEMENTS_V2.md) - Details on memory safety and performance improvements
+- [Sample Applications](samples/README.md) - Detailed guide to all sample applications
+- [Real-time Design Guide](samples/docs/RealtimeDesignGuide/README.md) - Best practices for real-time STT
 
 ## License
 
