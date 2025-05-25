@@ -106,10 +106,13 @@ The toolkit now includes a WenetONNX operator that uses ONNX Runtime for inferen
 - **Better performance**: ONNX Runtime optimizations for CPU and GPU
 - **Cross-platform compatibility**: Works on more platforms
 - **Smaller footprint**: Reduced memory and disk usage
+- **Production-quality feature extraction**: Uses kaldi-native-fbank for acoustic features
 
-### Installing ONNX Runtime
+### Installing Dependencies
 
-The toolkit includes an automatic setup script:
+The toolkit requires two main dependencies for the ONNX operator:
+
+#### 1. ONNX Runtime
 
 ```bash
 # Install ONNX Runtime (downloads and configures automatically)
@@ -117,6 +120,22 @@ The toolkit includes an automatic setup script:
 ```
 
 This will download ONNX Runtime 1.16.3 and configure it in the `deps/onnxruntime` directory.
+
+#### 2. Kaldi Native Fbank (for feature extraction)
+
+```bash
+# Install kaldi-native-fbank for production-quality feature extraction
+./setup_kaldi_fbank.sh
+
+# Or build from source if you need custom options
+./setup_kaldi_fbank.sh --build-from-source
+```
+
+This installs kaldi-native-fbank in the `deps/kaldi-native-fbank` directory. The library provides:
+- Industry-standard Mel-filterbank feature extraction
+- Compatible with WeNet, Kaldi, and other ASR systems
+- Optimized C++ implementation
+- Streaming support for real-time processing
 
 ### Exporting WeNet Models to ONNX
 
@@ -161,6 +180,22 @@ stream<rstring text, boolean isFinal, float64 confidence> Transcription =
 
 ## Building the Toolkit
 
+### For WenetONNX Operator (Recommended)
+
+```bash
+# 1. Install dependencies
+./setup_onnx_runtime.sh
+./setup_kaldi_fbank.sh
+
+# 2. Build the toolkit
+./build.sh --clean --onnx
+
+# 3. Build and install to STREAMS_INSTALL directory
+./build.sh --clean --onnx --install
+```
+
+### For WenetSTT Operator (Legacy)
+
 Once WeNet dependencies are installed, you can build the toolkit:
 
 ```bash
@@ -179,16 +214,34 @@ Once WeNet dependencies are installed, you can build the toolkit:
 The build script supports several options:
 
 - `--clean`: Clean build artifacts before building
-- `--wenet-path PATH`: Path to WeNet installation
-- `--torch-path PATH`: Path to LibTorch installation
+- `--onnx`: Build only the ONNX operator (recommended)
+- `--wenet-path PATH`: Path to WeNet installation (for WenetSTT operator)
+- `--torch-path PATH`: Path to LibTorch installation (for WenetSTT operator)
 - `--test`: Run tests after building (requires a model)
 - `--wenet-model PATH`: Path to WeNet model for testing
 - `--install`: Install the toolkit to STREAMS_INSTALL/toolkits
-- `--install-deps`: Install WeNet dependencies
+- `--install-deps`: Install WeNet dependencies (for WenetSTT operator)
 
 ## QuickStart Guide
 
+This toolkit follows a **build once, deploy anywhere** approach. After the initial setup, all dependencies are bundled with your Streams applications automatically.
+
 ### 1. Install Dependencies and Build the Toolkit
+
+#### For WenetONNX (Recommended)
+
+```bash
+# Step 1: Download and install dependencies (one-time setup)
+./setup_onnx_runtime.sh      # Downloads ONNX Runtime
+./setup_kaldi_fbank.sh        # Builds feature extraction library
+
+# Step 2: Build the toolkit (packages all dependencies)
+./build.sh --clean --onnx
+
+# That's it! The toolkit now contains all necessary libraries in impl/lib/
+```
+
+#### For WenetSTT (Legacy)
 
 ```bash
 # Install dependencies and download a model
@@ -250,8 +303,11 @@ stream<rstring partialText, boolean isFinal, float64 confidence> Transcription =
 ### 3. Compile and Run the Application
 
 ```bash
-# Compile
+# Compile (the -t flag includes the toolkit and all its dependencies)
 sc -M RealtimeTranscriber -t /path/to/com.teracloud.streams.s2t_wenet
+
+# The resulting .sab file contains all necessary libraries - no additional 
+# installation needed on runtime nodes!
 
 # Run with WenetONNX
 streamtool submitjob output/RealtimeTranscriber.sab \
@@ -264,6 +320,8 @@ streamtool submitjob output/RealtimeTranscriber.sab \
     -P modelPath=~/wenet_models/gigaspeech_s3_conformer \
     -P audioEndpoint=ws://audio-source:9000/stream
 ```
+
+**Note**: The toolkit is self-contained. After building the toolkit, all dependencies (ONNX Runtime, kaldi-native-fbank, etc.) are packaged with your application. You don't need to install these libraries on your Streams runtime nodes.
 
 ## Sample Application
 
@@ -329,9 +387,28 @@ The ONNX implementation offers several performance advantages:
    - Check that vocabulary and CMVN files match the model
    - Verify the model supports dynamic batch sizes
 
+6. **Feature extraction errors with WenetONNX**:
+   - Run `./setup_kaldi_fbank.sh` to install kaldi-native-fbank
+   - Check that `deps/kaldi-native-fbank/lib/libkaldi-native-fbank-core.so` exists
+   - Verify the library is properly linked: `ldd impl/lib/libwenetonnx.so | grep kaldi`
+   - If missing, rebuild with: `./build.sh --clean --onnx`
+
 ### Verifying Installation
 
-To verify that WeNet is properly integrated:
+#### For WenetONNX:
+
+```bash
+# Check that all dependencies are properly linked
+ldd impl/lib/libwenetonnx.so
+
+# Verify ONNX Runtime is found
+ldd impl/lib/libwenetonnx.so | grep onnxruntime
+
+# Verify kaldi-native-fbank is found  
+ldd impl/lib/libwenetonnx.so | grep kaldi-native-fbank
+```
+
+#### For WenetSTT:
 
 ```bash
 # Build and run the test suite

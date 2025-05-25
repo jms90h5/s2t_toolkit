@@ -97,14 +97,32 @@ target_link_libraries(wenetonnx
 )
 
 # Optional: Kaldi native fbank for better feature extraction
-find_path(KALDI_NATIVE_FBANK_INCLUDE kaldi-native-fbank/csrc/feature-fbank.h)
-find_library(KALDI_NATIVE_FBANK_LIB kaldi-native-fbank-core)
+set(KALDI_NATIVE_FBANK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/deps/kaldi-native-fbank" CACHE PATH "Path to kaldi-native-fbank")
+
+find_path(KALDI_NATIVE_FBANK_INCLUDE kaldi-native-fbank/csrc/feature-fbank.h
+    PATHS ${KALDI_NATIVE_FBANK_ROOT}/include
+          /usr/local/include
+          /usr/include
+    NO_DEFAULT_PATH
+)
+
+find_library(KALDI_NATIVE_FBANK_LIB kaldi-native-fbank-core
+    PATHS ${KALDI_NATIVE_FBANK_ROOT}/lib
+          /usr/local/lib
+          /usr/lib
+    NO_DEFAULT_PATH
+)
 
 if(KALDI_NATIVE_FBANK_INCLUDE AND KALDI_NATIVE_FBANK_LIB)
-    message(STATUS "Found Kaldi native fbank")
+    message(STATUS "Found Kaldi native fbank: ${KALDI_NATIVE_FBANK_LIB}")
+    message(STATUS "Kaldi native fbank includes: ${KALDI_NATIVE_FBANK_INCLUDE}")
     target_compile_definitions(wenetonnx PRIVATE USE_KALDI_NATIVE_FBANK)
     target_include_directories(wenetonnx PRIVATE ${KALDI_NATIVE_FBANK_INCLUDE})
     target_link_libraries(wenetonnx PRIVATE ${KALDI_NATIVE_FBANK_LIB})
+else()
+    message(WARNING "Kaldi native fbank not found. Feature extraction will use simplified implementation.")
+    message(STATUS "  Looked in: ${KALDI_NATIVE_FBANK_ROOT}")
+    message(STATUS "  To install: ./setup_kaldi_fbank.sh")
 endif()
 
 # CUDA support

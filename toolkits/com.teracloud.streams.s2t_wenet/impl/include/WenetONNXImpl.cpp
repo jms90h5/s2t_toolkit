@@ -8,7 +8,7 @@
 
 // For feature extraction
 #ifdef USE_KALDI_NATIVE_FBANK
-#include "kaldi-native-fbank/csrc/feature-fbank.h"
+#include "kaldi-native-fbank/csrc/online-feature.h"
 #else
 // Simple Fbank implementation
 #include "SimpleFbank.hpp"
@@ -285,20 +285,28 @@ std::vector<float> WenetONNXImpl::extractFbankFeatures(
     knf::FbankOptions opts;
     opts.frame_opts.dither = 0.0;
     opts.frame_opts.window_type = "hamming";
-    opts.frame_opts.frame_length_ms = config_.frame_length_ms;
-    opts.frame_opts.frame_shift_ms = config_.frame_shift_ms;
+    opts.frame_opts.frame_length_ms = static_cast<float>(config_.frame_length_ms);
+    opts.frame_opts.frame_shift_ms = static_cast<float>(config_.frame_shift_ms);
+    opts.frame_opts.samp_freq = static_cast<float>(config_.sample_rate);
     opts.mel_opts.num_bins = config_.num_mel_bins;
     opts.mel_opts.low_freq = 0;
-    opts.mel_opts.high_freq = config_.sample_rate / 2;
+    opts.mel_opts.high_freq = config_.sample_rate / 2.0f;
     
-    knf::Fbank fbank(opts);
-    auto features = fbank.ComputeFeatures(audio.data(), num_samples, config_.sample_rate);
+    knf::OnlineFbank fbank(opts);
     
-    // Flatten to vector
+    // Process audio
+    fbank.AcceptWaveform(config_.sample_rate, audio.data(), audio.size());
+    
+    // Extract all available frames
+    int num_frames_ready = fbank.NumFramesReady();
     std::vector<float> result;
-    for (const auto& frame : features) {
-        result.insert(result.end(), frame.begin(), frame.end());
+    result.reserve(num_frames_ready * config_.num_mel_bins);
+    
+    for (int i = 0; i < num_frames_ready; ++i) {
+        const float* frame = fbank.GetFrame(i);
+        result.insert(result.end(), frame, frame + config_.num_mel_bins);
     }
+    
     return result;
     #else
     // Simple Fbank implementation (placeholder)
