@@ -92,7 +92,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
     const IPort0Type& iport = static_cast<const IPort0Type&>(tuple);
     
     // Get audio data
-    processAudioData(iport.get_audio());
+    processAudioData(iport.get_audioChunk());
     
     // Get timestamp
     audio_timestamp_ms_ = iport.get_audioTimestamp();
@@ -131,14 +131,10 @@ void MY_OPERATOR::submitResult(const onnx_stt::OnnxSTTWrapper::TranscriptionResu
     // Create output tuple
     OPort0Type otuple;
     
-    // Set attributes - adjust based on your output schema
-    // Assuming: text (rstring), isFinal (boolean), confidence (float64), 
-    //           timestamp (uint64), latencyMs (uint64)
+    // Set attributes based on output schema: text, isFinal, confidence
     otuple.set_text(result.text);
     otuple.set_isFinal(result.is_final);
     otuple.set_confidence(result.confidence);
-    otuple.set_audioTimestamp(result.timestamp_ms);
-    otuple.set_latencyMs(result.latency_ms);
     
     // Submit the tuple
     submit(otuple, 0);
