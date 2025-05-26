@@ -1,4 +1,4 @@
-// IJD_0a3nf8YxgwMdn6wQFkmIAxUcDif2G0thWMGbTS1aNtd77irQ1GdwTIDuWcFZKJieFgwVNmQplTUWYysTQDV
+// aCJ5mf42biDlno5PL7nq3C4fVUobzYGz4JNHCyBtxnRJ70KzWKvly9hmTWwm6P4gq_0qZSE5wNyBOVGeRmDC6D2
 
 
 
@@ -256,9 +256,7 @@ void MY_OPERATOR_SCOPE::MY_OPERATOR::process(Tuple const & tuple$, uint32_t port
         
         SPL::serializeWithPrecision(_f->writeTo(), iport$0.get_text()) << ',';
 	SPL::serializeWithPrecision(_f->writeTo(), iport$0.get_isFinal()) << ',';
-	SPL::serializeWithPrecision(_f->writeTo(), iport$0.get_confidence()) << ',';
-	SPL::serializeWithPrecision(_f->writeTo(), iport$0.get_audioTimestamp()) << ',';
-	SPL::serializeWithPrecision(_f->writeTo(), iport$0.get_latencyMs()) << '\n';
+	SPL::serializeWithPrecision(_f->writeTo(), iport$0.get_confidence()) << '\n';
 
         
         if (!_f->fs()) {

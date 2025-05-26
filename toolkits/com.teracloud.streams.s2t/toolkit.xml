@@ -6,14 +6,15 @@ This toolkit provides integration with the WeNet speech recognition framework,
 enabling real-time streaming speech-to-text capabilities for TeraCloud Streams applications.
     </description>
     <uriTable>
-      <uri index="5" value="com.teracloud.streams.s2t/OnnxSTT"/>
-      <uri index="4" value="com.teracloud.streams.s2t/WenetSTT"/>
+      <uri index="6" value="com.teracloud.streams.s2t/OnnxSTT"/>
+      <uri index="5" value="com.teracloud.streams.s2t/WenetSTT"/>
       <uri index="3" value="com.teracloud.streams.s2t/WenetSpeechToText.spl"/>
+      <uri index="4" value="com.teracloud.streams.s2t/FileAudioSource.spl"/>
       <uri index="2" value="com.teracloud.streams.s2t/WebSocketSink.spl"/>
       <uri index="1" value="com.teracloud.streams.s2t/AudioStreamSource.spl"/>
     </uriTable>
     <namespace name="com.teracloud.streams.s2t">
-      <primitiveOp language="Cpp" modelUriIndex="4" name="WenetSTT" public="true">
+      <primitiveOp language="Cpp" modelUriIndex="5" name="WenetSTT" public="true">
         <description>
         The WenetSTT operator provides real-time speech-to-text transcription using the WeNet toolkit.
         It processes streaming audio data and outputs transcription results with support for partial
@@ -42,7 +43,7 @@ enabling real-time streaming speech-to-text capabilities for TeraCloud Streams a
           <description>Transcription output stream</description>
         </outputPort>
       </primitiveOp>
-      <primitiveOp language="Cpp" modelUriIndex="5" name="OnnxSTT" public="true">
+      <primitiveOp language="Cpp" modelUriIndex="6" name="OnnxSTT" public="true">
         <description>
         ONNX-based Speech-to-Text operator using ONNX Runtime.
         This operator provides real-time speech recognition using speech models
@@ -108,6 +109,15 @@ enabling real-time streaming speech-to-text capabilities for TeraCloud Streams a
         <parameter defaultValue="1" metaType="Expression" name="numThreads" optional="true" type="&lt;int32>"/>
         <inputPort name="AudioStream" portIndex="0" type="stream&lt;tuple&lt;blob audioChunk, uint64 audioTimestamp>>"/>
         <outputPort name="TranscriptionStream" portIndex="0" type="stream&lt;tuple&lt;rstring text, boolean isFinal, float64 confidence>>"/>
+      </compositeOp>
+      <compositeOp column="18" line="27" name="FileAudioSource" potentialMain="false" public="true" uriIndex="4">
+        <parameter metaType="Expression" name="filename" optional="false" type="&lt;rstring>"/>
+        <parameter defaultValue="3200u" metaType="Expression" name="blockSize" optional="true" type="&lt;uint32>"/>
+        <parameter defaultValue="16000" metaType="Expression" name="sampleRate" optional="true" type="&lt;int32>"/>
+        <parameter defaultValue="16" metaType="Expression" name="bitsPerSample" optional="true" type="&lt;int32>"/>
+        <parameter defaultValue="1" metaType="Expression" name="channelCount" optional="true" type="&lt;int32>"/>
+        <outputPort name="AudioStream" portIndex="0"/>
+        <type column="9" line="36" name="AudioChunkType" type="tuple&lt;blob audioChunk, uint64 audioTimestamp>" uriIndex="4"/>
       </compositeOp>
     </namespace>
     <sabFiles>

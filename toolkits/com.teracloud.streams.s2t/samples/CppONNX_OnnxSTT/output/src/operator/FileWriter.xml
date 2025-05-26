@@ -34,7 +34,7 @@
     <networkByteOrdering>false</networkByteOrdering>
     <codeBeautification>false</codeBeautification>
     <includes>
-      <include>"../type/BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm.h"</include>
+      <include>"../type/BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl.h"</include>
       <include>"../type/BuoCzre0fg5iJdQnrwapkCyjYEMMfTagKrJ53r_0jmfdVfmhf4hwant6OIuyi_14dk4y_0FAB2rdBfcbFQiN6Jd_0An.h"</include>
     </includes>
     <stateVariables/>
@@ -48,7 +48,7 @@
     </runtimeConstants>
     <sourceLocation>
       <file>ONNXRealtime.spl</file>
-      <line>76</line>
+      <line>68</line>
       <column>9</column>
     </sourceLocation>
     <productVersion>7.2.0.0</productVersion>
@@ -71,14 +71,14 @@
           <parameterExpressionMode>Expression</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>78</line>
+            <line>70</line>
             <column>23</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>78</line>
+        <line>70</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -98,14 +98,14 @@
           <parameterExpressionMode>CustomLiteral</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>79</line>
+            <line>71</line>
             <column>25</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>79</line>
+        <line>71</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -125,14 +125,14 @@
           <parameterExpressionMode>Constant</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>80</line>
+            <line>72</line>
             <column>31</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>80</line>
+        <line>72</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -141,13 +141,13 @@
     <inputPort>
       <index>0</index>
       <tupleCppName>iport$0</tupleCppName>
-      <tupleCppType>SPL::BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm</tupleCppType>
-      <tupleSPLType>tuple&lt;rstring text,boolean isFinal,float64 confidence,uint64 audioTimestamp,uint64 latencyMs&gt;</tupleSPLType>
+      <tupleCppType>SPL::BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl</tupleCppType>
+      <tupleSPLType>tuple&lt;rstring text,boolean isFinal,float64 confidence&gt;</tupleSPLType>
       <facade>false</facade>
       <mutationAllowed>false</mutationAllowed>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>76</line>
+        <line>68</line>
         <column>37</column>
       </sourceLocation>
       <attributes>
@@ -166,23 +166,11 @@
           <cppType>SPL::float64</cppType>
           <splType>float64</splType>
         </attribute>
-        <attribute>
-          <name>audioTimestamp</name>
-          <cppType>SPL::uint64</cppType>
-          <splType>uint64</splType>
-        </attribute>
-        <attribute>
-          <name>latencyMs</name>
-          <cppType>SPL::uint64</cppType>
-          <splType>uint64</splType>
-        </attribute>
       </attributes>
       <tuple>
         <tt:attr name="text" type="rstring"/>
         <tt:attr name="isFinal" type="boolean"/>
         <tt:attr name="confidence" type="float64"/>
-        <tt:attr name="audioTimestamp" type="uint64"/>
-        <tt:attr name="latencyMs" type="uint64"/>
       </tuple>
     </inputPort>
   </inputPorts>

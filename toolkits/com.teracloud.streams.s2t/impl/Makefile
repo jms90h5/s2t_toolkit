@@ -7,7 +7,7 @@ TOOLKIT_DIR := ..
 include Makefile.common
 
 # Source files
-SOURCES = include/OnnxSTTImpl.cpp include/OnnxSTTWrapper.cpp include/WenetSTTImpl.cpp include/WenetSTTWrapper.cpp
+SOURCES = include/OnnxSTTImpl.cpp include/OnnxSTTWrapper.cpp include/WenetSTTImpl.cpp include/WenetSTTWrapper.cpp include/WenetDynamicLoader.cpp
 
 # Target library
 LIB = libs2t_impl.so
@@ -17,11 +17,13 @@ CXXFLAGS += -fPIC -std=c++14 -Wall -Wextra
 CXXFLAGS += -Iinclude
 CXXFLAGS += -I$(ONNXRUNTIME_ROOT)/include
 
-# Linker flags
+# Linker flags 
 LDFLAGS += -shared
 LDFLAGS += -L$(ONNXRUNTIME_ROOT)/lib
 LDFLAGS += -lonnxruntime
+LDFLAGS += -ldl
 LDFLAGS += -Wl,-rpath,'$$ORIGIN'
+LDFLAGS += -Wl,-rpath,'$$ORIGIN/lib'
 LDFLAGS += -Wl,-rpath,$(ONNXRUNTIME_ROOT)/lib
 
 # Build rules

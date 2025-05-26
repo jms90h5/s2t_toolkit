@@ -9,7 +9,7 @@ Sample application demonstrating ONNX-based speech-to-text with the WenetONNX op
     </uriTable>
     <namespace name="">
       <compositeOp column="11" line="11" name="ONNXRealtime" potentialMain="true" uriIndex="1">
-        <parameter defaultValue="&quot;./models&quot;" metaType="Expression" name="modelDir" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="&quot;../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20&quot;" metaType="Expression" name="modelDir" optional="true" type="&lt;rstring>"/>
       </compositeOp>
     </namespace>
     <dependency>

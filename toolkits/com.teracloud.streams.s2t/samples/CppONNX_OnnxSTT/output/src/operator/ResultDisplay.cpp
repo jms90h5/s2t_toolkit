@@ -1,4 +1,4 @@
-// TqYu_18l7xeo3HjnrhCtzKBNYDyKj8ThOf7nIjM5IlGr9GMJ7IGor2H3pyyG1Y46c_1HoLmKavdg_1ZP3DeVg0jBG
+// VpmDpNjOR5z3vpJPFYxjXRCJdXV9h5BxHzn0roLYzWpO0bey9jeD4h2rvTHg3C0W3Rvx4uSGyx6okTLpjTJXAd
 
 
 #include "./ResultDisplay.h"
@@ -44,21 +44,13 @@ MY_BASE_OPERATOR::MY_BASE_OPERATOR()
     initRTC(*this, lit$11, "lit$11");
     initRTC(*this, lit$12, "lit$12");
     initRTC(*this, lit$13, "lit$13");
-    initRTC(*this, lit$14, "lit$14");
-    initRTC(*this, lit$15, "lit$15");
-    initRTC(*this, lit$16, "lit$16");
-    initRTC(*this, lit$17, "lit$17");
-    initRTC(*this, lit$18, "lit$18");
-    initRTC(*this, lit$19, "lit$19");
-    initRTC(*this, lit$20, "lit$20");
-    initRTC(*this, lit$21, "lit$21");
-    state$resultCount = lit$18;
+    state$resultCount = lit$10;
     SPLAPPTRC(L_DEBUG, "Variable: state$resultCount Value: " << state$resultCount,SPL_OPER_DBG);
-    state$totalLatency = lit$19;
+    state$totalLatency = lit$11;
     SPLAPPTRC(L_DEBUG, "Variable: state$totalLatency Value: " << state$totalLatency,SPL_OPER_DBG);
-    state$minLatency = lit$20;
+    state$minLatency = lit$12;
     SPLAPPTRC(L_DEBUG, "Variable: state$minLatency Value: " << state$minLatency,SPL_OPER_DBG);
-    state$maxLatency = lit$21;
+    state$maxLatency = lit$13;
     SPLAPPTRC(L_DEBUG, "Variable: state$maxLatency Value: " << state$maxLatency,SPL_OPER_DBG);
     (void) getParameters(); // ensure thread safety by initializing here
     OperatorMetrics& om = getContext().getMetrics();
@@ -79,21 +71,13 @@ void MY_BASE_OPERATOR::tupleLogic(Tuple const & tuple, uint32_t port) {
     AutoPortMutex $apm($svMutex, *this);
     
 {
-    ::SPL::Functions::Utility::printStringLn((((((((lit$6 + ::SPL::spl_cast<SPL::rstring, SPL::uint64 >::cast(iport$0.get_latencyMs())) + lit$5) + iport$0.get_text()) + (iport$0.get_isFinal() ? lit$4 : lit$3)) + lit$2) + ::SPL::spl_cast<SPL::rstring, SPL::float64 >::cast((iport$0.get_confidence() * lit$1))) + lit$0));
+    ::SPL::Functions::Utility::printStringLn(((((iport$0.get_text() + (iport$0.get_isFinal() ? lit$4 : lit$3)) + lit$2) + ::SPL::spl_cast<SPL::rstring, SPL::float64 >::cast((iport$0.get_confidence() * lit$1))) + lit$0));
     state$resultCount++;
-    state$totalLatency += iport$0.get_latencyMs();
-    if ((iport$0.get_latencyMs() < state$minLatency)) 
-        state$minLatency = iport$0.get_latencyMs();
-    if ((iport$0.get_latencyMs() > state$maxLatency)) 
-        state$maxLatency = iport$0.get_latencyMs();
-    if ((SPL::uint64(state$resultCount % lit$8) == lit$7)) 
+    if ((SPL::uint64(state$resultCount % lit$6) == lit$5)) 
         {
+            ::SPL::Functions::Utility::printStringLn(lit$7);
+            ::SPL::Functions::Utility::printStringLn((lit$8 + ::SPL::spl_cast<SPL::rstring, SPL::uint64 >::cast(state$resultCount)));
             ::SPL::Functions::Utility::printStringLn(lit$9);
-            ::SPL::Functions::Utility::printStringLn((lit$10 + ::SPL::spl_cast<SPL::rstring, SPL::uint64 >::cast(state$resultCount)));
-            ::SPL::Functions::Utility::printStringLn(((lit$12 + ::SPL::spl_cast<SPL::rstring, SPL::uint64 >::cast(SPL::uint64(state$totalLatency / state$resultCount))) + lit$11));
-            ::SPL::Functions::Utility::printStringLn(((lit$14 + ::SPL::spl_cast<SPL::rstring, SPL::uint64 >::cast(state$minLatency)) + lit$13));
-            ::SPL::Functions::Utility::printStringLn(((lit$16 + ::SPL::spl_cast<SPL::rstring, SPL::uint64 >::cast(state$maxLatency)) + lit$15));
-            ::SPL::Functions::Utility::printStringLn(lit$17);
         }
 }
 
@@ -210,13 +194,13 @@ void MY_BASE_OPERATOR::resetStateVariables(Checkpoint & ckpt) {
 }
 
 void MY_BASE_OPERATOR::resetStateVariablesToInitialState() {
-    state$resultCount = lit$18;
+    state$resultCount = lit$10;
     SPLAPPTRC(L_DEBUG, "Variable: state$resultCount Value: " << state$resultCount,SPL_OPER_DBG);
-    state$totalLatency = lit$19;
+    state$totalLatency = lit$11;
     SPLAPPTRC(L_DEBUG, "Variable: state$totalLatency Value: " << state$totalLatency,SPL_OPER_DBG);
-    state$minLatency = lit$20;
+    state$minLatency = lit$12;
     SPLAPPTRC(L_DEBUG, "Variable: state$minLatency Value: " << state$minLatency,SPL_OPER_DBG);
-    state$maxLatency = lit$21;
+    state$maxLatency = lit$13;
     SPLAPPTRC(L_DEBUG, "Variable: state$maxLatency Value: " << state$maxLatency,SPL_OPER_DBG);
 }
 

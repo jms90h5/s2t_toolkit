@@ -1,4 +1,0 @@
-	@$(CXX_LN) $(SPL_CXXFLAGS) -o bin/MockTranscription.so -fPIC -shared $(SOMockTranscription) $(SPL_LDFLAGS)\
-	    build/operator/MockTranscription.o \
-	    build/type/BWS8pWC_1HYKrTViSTcG4T5GFz_0nGxqvmNlrajI9k_1E5zHNl9YbvsoTe9P3EfS_0f6OzRd8ZZzCJBaSXCG5A8XGA6.o \
-	    build/type/BpSUw8mfEcWf02DHxFXcAEfeiSinvo2iyOrm4KEfBRvnHy4jMGnM6au_0nCr0kf7SJp_1QitTcsqIopJSCi7aPgAg.o 

@@ -13,26 +13,26 @@ composite ONNXRealtime {
         expression<rstring> $modelDir : "../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20";
         
     graph
-        // Audio source - reads real WAV files from test data
-        stream<blob audio, uint64 audioTimestamp> AudioStream = AudioStreamSource() {
+        // Audio source - reads real audio files from test data
+        stream<blob audioChunk, uint64 audioTimestamp> AudioStream = FileAudioSource() {
             param
-                audioFile: "../../test_data/audio/0.wav";
-                chunkSizeMs: 100;
+                filename: "../../test_data/audio/librispeech-1995-1837-0001.raw";
+                blockSize: 3200u;  // 100ms of 16kHz 16-bit mono audio
                 sampleRate: 16000;
-                format: "wav";
+                bitsPerSample: 16;
+                channelCount: 1;
         }
         
         // ONNX-based speech recognition
-        stream<rstring text, boolean isFinal, float64 confidence, 
-                uint64 audioTimestamp, uint64 latencyMs> 
+        stream<rstring text, boolean isFinal, float64 confidence> 
             Transcription = OnnxSTT(AudioStream) {
             param
-                encoderModel: $modelDir + "/wenet_encoder.onnx";
-                vocabFile: $modelDir + "/vocab.txt";
-                cmvnFile: $modelDir + "/global_cmvn.stats";
+                encoderModel: "../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/decoder-epoch-99-avg-1.onnx";
+                vocabFile: "../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/tokens.txt"; 
+                cmvnFile: "models/global_cmvn.stats";
                 sampleRate: 16000;
                 chunkSizeMs: 100;
-                provider: "CPU";  // or "CUDA" for GPU
+                provider: "CPU";
                 numThreads: 4;
         }
         
@@ -48,25 +48,18 @@ composite ONNXRealtime {
                 
                 onTuple Transcription: {
                     // Display transcription
-                    printStringLn("[" + (rstring)latencyMs + "ms] " + 
-                                 text + 
+                    printStringLn(text + 
                                  (isFinal ? " (FINAL)" : " ...") +
                                  " [conf: " + (rstring)(confidence * 100.0) + "%]");
                     
                     // Update statistics
                     resultCount++;
-                    totalLatency += latencyMs;
-                    if (latencyMs < minLatency) minLatency = latencyMs;
-                    if (latencyMs > maxLatency) maxLatency = latencyMs;
                     
                     // Show performance summary every 10 results
                     if (resultCount % 10ul == 0ul) {
                         printStringLn("\n=== ONNX C++ Performance ===");
                         printStringLn("Results: " + (rstring)resultCount);
-                        printStringLn("Average: " + (rstring)(totalLatency/resultCount) + "ms");
-                        printStringLn("Min: " + (rstring)minLatency + "ms");
-                        printStringLn("Max: " + (rstring)maxLatency + "ms");
-                        printStringLn("Target: <150ms for C++ ONNX\n");
+                        printStringLn("Successfully processing audio\n");
                     }
                 }
         }

@@ -6,6 +6,7 @@
     <file name="toolkit.xml"/>
   </toolkit>
   <toolkit compileRoot="/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t" name="com.teracloud.streams.s2t" version="1.0.0">
+    <file name="samples/BasicWorkingExample/test_output/etc/adl"/>
     <file name="samples/BasicWorkingExample/output/etc/adl"/>
     <file name="samples/BasicWorkingExample/toolkit.xml"/>
     <file name="samples/CppONNX_OnnxSTT/toolkit.xml"/>
@@ -328,12 +329,11 @@
     <file name="samples/CppWeNet_STT/standalone/wenet_build/wenet/test/resources/librispeech.train_960_unigram5000.bpemodel"/>
     <file name="samples/CppWeNet_STT/standalone/wenet_build/wenet/test/resources/librispeech.words.txt"/>
     <file name="samples/CppWeNet_STT/standalone/wenet_build/wenet/tools/parse_options.sh"/>
-    <file name="samples/CppWeNet_STT/standalone/cpp_implementation/lib/libwenet.so"/>
-    <file name="samples/CppWeNet_STT/standalone/cpp_implementation/lib/mock_wenet.cpp"/>
     <file name="samples/CppWeNet_STT/etc/audio-simulator.sh"/>
     <file name="samples/CppWeNet_STT/etc/run-transcriber.sh"/>
     <file name="samples/CppWeNet_STT/etc/viewer.html"/>
     <file name="samples/CppWeNet_STT/toolkit.xml"/>
+    <file name="samples/CppWeNet_STT/output/etc/adl"/>
     <file name="impl/include/wenet/core/cmake/libtorch.cmake"/>
     <file name="impl/include/wenet/core/kaldi/base/io-funcs-inl.h"/>
     <file name="impl/include/wenet/core/kaldi/decoder/lattice-faster-online-decoder.cc"/>
@@ -359,7 +359,6 @@
     <file name="impl/lib/libonnxruntime.so.1.16.3"/>
     <file name="impl/lib/libwenetcpp.cpp"/>
     <file name="impl/lib/libwenetcpp.so"/>
-    <file name="impl/lib/libwenetonnx.so"/>
     <file name="impl/libs2t_impl.so"/>
     <file name="download_models.sh"/>
     <file name="toolkit.xml"/>
@@ -370,6 +369,9 @@
     <file name="deps/onnxruntime/include/onnxruntime_session_options_config_keys.h"/>
     <file name="deps/onnxruntime/lib/libonnxruntime.so"/>
     <file name="deps/onnxruntime/lib/libonnxruntime.so.1.16.3"/>
+    <file name="models/librispeech_model.tar.gz"/>
+    <file name="test_data/audio/librispeech-1995-1837-0001.wav"/>
+    <file name="test_data/audio/librispeech-1995-1837-0001.raw"/>
   </toolkit>
   <toolkit compileRoot="/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppONNX_OnnxSTT" name="ONNXDemo" version="1.0.0">
     <file name="toolkit.xml"/>

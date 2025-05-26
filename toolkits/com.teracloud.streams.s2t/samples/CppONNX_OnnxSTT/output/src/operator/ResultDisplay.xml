@@ -34,7 +34,7 @@
     <networkByteOrdering>false</networkByteOrdering>
     <codeBeautification>false</codeBeautification>
     <includes>
-      <include>"../type/BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm.h"</include>
+      <include>"../type/BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl.h"</include>
     </includes>
     <stateVariables>
       <stateVariable>
@@ -45,7 +45,7 @@
           <cppType>SPL::uint64</cppType>
           <splType>uint64</splType>
           <hasRuntimeConstant>true</hasRuntimeConstant>
-          <cppExpression>lit$18</cppExpression>
+          <cppExpression>lit$10</cppExpression>
           <splExpression>0</splExpression>
           <hasFunctions>false</hasFunctions>
           <hasSideEffects>false</hasSideEffects>
@@ -53,13 +53,13 @@
           <hasStreamAttributes>false</hasStreamAttributes>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>44</line>
+            <line>43</line>
             <column>50</column>
           </sourceLocation>
         </value>
         <sourceLocation>
           <file>ONNXRealtime.spl</file>
-          <line>44</line>
+          <line>43</line>
           <column>36</column>
         </sourceLocation>
       </stateVariable>
@@ -71,7 +71,7 @@
           <cppType>SPL::uint64</cppType>
           <splType>uint64</splType>
           <hasRuntimeConstant>true</hasRuntimeConstant>
-          <cppExpression>lit$19</cppExpression>
+          <cppExpression>lit$11</cppExpression>
           <splExpression>0</splExpression>
           <hasFunctions>false</hasFunctions>
           <hasSideEffects>false</hasSideEffects>
@@ -79,13 +79,13 @@
           <hasStreamAttributes>false</hasStreamAttributes>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>45</line>
+            <line>44</line>
             <column>51</column>
           </sourceLocation>
         </value>
         <sourceLocation>
           <file>ONNXRealtime.spl</file>
-          <line>45</line>
+          <line>44</line>
           <column>36</column>
         </sourceLocation>
       </stateVariable>
@@ -97,8 +97,34 @@
           <cppType>SPL::uint64</cppType>
           <splType>uint64</splType>
           <hasRuntimeConstant>true</hasRuntimeConstant>
-          <cppExpression>lit$20</cppExpression>
+          <cppExpression>lit$12</cppExpression>
           <splExpression>999999</splExpression>
+          <hasFunctions>false</hasFunctions>
+          <hasSideEffects>false</hasSideEffects>
+          <readsState>false</readsState>
+          <hasStreamAttributes>false</hasStreamAttributes>
+          <sourceLocation>
+            <file>ONNXRealtime.spl</file>
+            <line>45</line>
+            <column>49</column>
+          </sourceLocation>
+        </value>
+        <sourceLocation>
+          <file>ONNXRealtime.spl</file>
+          <line>45</line>
+          <column>36</column>
+        </sourceLocation>
+      </stateVariable>
+      <stateVariable>
+        <name>state$maxLatency</name>
+        <cppType>SPL::uint64</cppType>
+        <splType>uint64</splType>
+        <value>
+          <cppType>SPL::uint64</cppType>
+          <splType>uint64</splType>
+          <hasRuntimeConstant>true</hasRuntimeConstant>
+          <cppExpression>lit$13</cppExpression>
+          <splExpression>0</splExpression>
           <hasFunctions>false</hasFunctions>
           <hasSideEffects>false</hasSideEffects>
           <readsState>false</readsState>
@@ -112,32 +138,6 @@
         <sourceLocation>
           <file>ONNXRealtime.spl</file>
           <line>46</line>
-          <column>36</column>
-        </sourceLocation>
-      </stateVariable>
-      <stateVariable>
-        <name>state$maxLatency</name>
-        <cppType>SPL::uint64</cppType>
-        <splType>uint64</splType>
-        <value>
-          <cppType>SPL::uint64</cppType>
-          <splType>uint64</splType>
-          <hasRuntimeConstant>true</hasRuntimeConstant>
-          <cppExpression>lit$21</cppExpression>
-          <splExpression>0</splExpression>
-          <hasFunctions>false</hasFunctions>
-          <hasSideEffects>false</hasSideEffects>
-          <readsState>false</readsState>
-          <hasStreamAttributes>false</hasStreamAttributes>
-          <sourceLocation>
-            <file>ONNXRealtime.spl</file>
-            <line>47</line>
-            <column>49</column>
-          </sourceLocation>
-        </value>
-        <sourceLocation>
-          <file>ONNXRealtime.spl</file>
-          <line>47</line>
           <column>36</column>
         </sourceLocation>
       </stateVariable>
@@ -175,102 +175,54 @@
       </runtimeConstant>
       <runtimeConstant>
         <name>lit$5</name>
-        <cppType>SPL::rstring</cppType>
-        <splType>rstring</splType>
-        <value>"ms] "</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$6</name>
-        <cppType>SPL::rstring</cppType>
-        <splType>rstring</splType>
-        <value>"["</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$7</name>
         <cppType>SPL::uint64</cppType>
         <splType>uint64</splType>
         <value>0</value>
       </runtimeConstant>
       <runtimeConstant>
-        <name>lit$8</name>
+        <name>lit$6</name>
         <cppType>SPL::uint64</cppType>
         <splType>uint64</splType>
         <value>10</value>
       </runtimeConstant>
       <runtimeConstant>
-        <name>lit$9</name>
+        <name>lit$7</name>
         <cppType>SPL::rstring</cppType>
         <splType>rstring</splType>
         <value>"\n=== ONNX C++ Performance ==="</value>
       </runtimeConstant>
       <runtimeConstant>
-        <name>lit$10</name>
+        <name>lit$8</name>
         <cppType>SPL::rstring</cppType>
         <splType>rstring</splType>
         <value>"Results: "</value>
       </runtimeConstant>
       <runtimeConstant>
-        <name>lit$11</name>
+        <name>lit$9</name>
         <cppType>SPL::rstring</cppType>
         <splType>rstring</splType>
-        <value>"ms"</value>
+        <value>"Successfully processing audio\n"</value>
+      </runtimeConstant>
+      <runtimeConstant>
+        <name>lit$10</name>
+        <cppType>SPL::uint64</cppType>
+        <splType>uint64</splType>
+        <value>0</value>
+      </runtimeConstant>
+      <runtimeConstant>
+        <name>lit$11</name>
+        <cppType>SPL::uint64</cppType>
+        <splType>uint64</splType>
+        <value>0</value>
       </runtimeConstant>
       <runtimeConstant>
         <name>lit$12</name>
-        <cppType>SPL::rstring</cppType>
-        <splType>rstring</splType>
-        <value>"Average: "</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$13</name>
-        <cppType>SPL::rstring</cppType>
-        <splType>rstring</splType>
-        <value>"ms"</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$14</name>
-        <cppType>SPL::rstring</cppType>
-        <splType>rstring</splType>
-        <value>"Min: "</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$15</name>
-        <cppType>SPL::rstring</cppType>
-        <splType>rstring</splType>
-        <value>"ms"</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$16</name>
-        <cppType>SPL::rstring</cppType>
-        <splType>rstring</splType>
-        <value>"Max: "</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$17</name>
-        <cppType>SPL::rstring</cppType>
-        <splType>rstring</splType>
-        <value>"Target: &lt;150ms for C++ ONNX\n"</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$18</name>
-        <cppType>SPL::uint64</cppType>
-        <splType>uint64</splType>
-        <value>0</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$19</name>
-        <cppType>SPL::uint64</cppType>
-        <splType>uint64</splType>
-        <value>0</value>
-      </runtimeConstant>
-      <runtimeConstant>
-        <name>lit$20</name>
         <cppType>SPL::uint64</cppType>
         <splType>uint64</splType>
         <value>999999</value>
       </runtimeConstant>
       <runtimeConstant>
-        <name>lit$21</name>
+        <name>lit$13</name>
         <cppType>SPL::uint64</cppType>
         <splType>uint64</splType>
         <value>0</value>
@@ -278,7 +230,7 @@
     </runtimeConstants>
     <sourceLocation>
       <file>ONNXRealtime.spl</file>
-      <line>41</line>
+      <line>40</line>
       <column>9</column>
     </sourceLocation>
     <productVersion>7.2.0.0</productVersion>
@@ -289,31 +241,23 @@
     <inputPort isControlPort="true">
       <index>0</index>
       <tupleCppName>iport$0</tupleCppName>
-      <tupleCppType>SPL::BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm</tupleCppType>
-      <tupleSPLType>tuple&lt;rstring text,boolean isFinal,float64 confidence,uint64 audioTimestamp,uint64 latencyMs&gt;</tupleSPLType>
+      <tupleCppType>SPL::BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl</tupleCppType>
+      <tupleSPLType>tuple&lt;rstring text,boolean isFinal,float64 confidence&gt;</tupleSPLType>
       <facade>false</facade>
       <mutationAllowed>false</mutationAllowed>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>41</line>
+        <line>40</line>
         <column>38</column>
       </sourceLocation>
       <tupleLogic>{
-    ::SPL::Functions::Utility::printStringLn((((((((lit$6 + ::SPL::spl_cast&lt;SPL::rstring, SPL::uint64 &gt;::cast(iport$0.get_latencyMs())) + lit$5) + iport$0.get_text()) + (iport$0.get_isFinal() ? lit$4 : lit$3)) + lit$2) + ::SPL::spl_cast&lt;SPL::rstring, SPL::float64 &gt;::cast((iport$0.get_confidence() * lit$1))) + lit$0));
+    ::SPL::Functions::Utility::printStringLn(((((iport$0.get_text() + (iport$0.get_isFinal() ? lit$4 : lit$3)) + lit$2) + ::SPL::spl_cast&lt;SPL::rstring, SPL::float64 &gt;::cast((iport$0.get_confidence() * lit$1))) + lit$0));
     state$resultCount++;
-    state$totalLatency += iport$0.get_latencyMs();
-    if ((iport$0.get_latencyMs() &lt; state$minLatency)) 
-        state$minLatency = iport$0.get_latencyMs();
-    if ((iport$0.get_latencyMs() &gt; state$maxLatency)) 
-        state$maxLatency = iport$0.get_latencyMs();
-    if ((SPL::uint64(state$resultCount % lit$8) == lit$7)) 
+    if ((SPL::uint64(state$resultCount % lit$6) == lit$5)) 
         {
+            ::SPL::Functions::Utility::printStringLn(lit$7);
+            ::SPL::Functions::Utility::printStringLn((lit$8 + ::SPL::spl_cast&lt;SPL::rstring, SPL::uint64 &gt;::cast(state$resultCount)));
             ::SPL::Functions::Utility::printStringLn(lit$9);
-            ::SPL::Functions::Utility::printStringLn((lit$10 + ::SPL::spl_cast&lt;SPL::rstring, SPL::uint64 &gt;::cast(state$resultCount)));
-            ::SPL::Functions::Utility::printStringLn(((lit$12 + ::SPL::spl_cast&lt;SPL::rstring, SPL::uint64 &gt;::cast(SPL::uint64(state$totalLatency / state$resultCount))) + lit$11));
-            ::SPL::Functions::Utility::printStringLn(((lit$14 + ::SPL::spl_cast&lt;SPL::rstring, SPL::uint64 &gt;::cast(state$minLatency)) + lit$13));
-            ::SPL::Functions::Utility::printStringLn(((lit$16 + ::SPL::spl_cast&lt;SPL::rstring, SPL::uint64 &gt;::cast(state$maxLatency)) + lit$15));
-            ::SPL::Functions::Utility::printStringLn(lit$17);
         }
 }
 </tupleLogic>
@@ -333,23 +277,11 @@
           <cppType>SPL::float64</cppType>
           <splType>float64</splType>
         </attribute>
-        <attribute>
-          <name>audioTimestamp</name>
-          <cppType>SPL::uint64</cppType>
-          <splType>uint64</splType>
-        </attribute>
-        <attribute>
-          <name>latencyMs</name>
-          <cppType>SPL::uint64</cppType>
-          <splType>uint64</splType>
-        </attribute>
       </attributes>
       <tuple>
         <tt:attr name="text" type="rstring"/>
         <tt:attr name="isFinal" type="boolean"/>
         <tt:attr name="confidence" type="float64"/>
-        <tt:attr name="audioTimestamp" type="uint64"/>
-        <tt:attr name="latencyMs" type="uint64"/>
       </tuple>
     </inputPort>
   </inputPorts>

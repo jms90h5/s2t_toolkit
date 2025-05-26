@@ -11,7 +11,7 @@ TOOLKIT_DIR := ..
 include $(TOOLKIT_DIR)/impl/Makefile.common
 
 # Toolkit name
-TOOLKIT = com.teracloud.streams.s2t_wenet
+TOOLKIT = com.teracloud.streams.s2t
 
 .PHONY: all clean
 

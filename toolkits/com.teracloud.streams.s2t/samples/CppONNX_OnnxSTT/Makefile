@@ -1,49 +1,26 @@
-# Makefile for ONNX Streams sample application
+# Makefile for ONNX Sample
 
-.PHONY: all clean submit cancel
+.PHONY: all distributed clean 
 
-# Application name matches the info.xml
-APP_NAME = ONNXDemo
+# Application parameters
+SPL_MAIN_COMPOSITE = ONNXRealtime
+SPLC = $(STREAMS_INSTALL)/bin/sc
+SPLC_FLAGS = -a -t ../../../
+OUTPUT_DIR = output
 
-# Streams variables
-STREAMS_INSTALL ?= $(shell echo $$STREAMS_INSTALL)
-STREAMTOOL = $(STREAMS_INSTALL)/bin/streamtool
+all: distributed
 
-# Build directory
-BUILD_DIR = output
+distributed:
+	$(SPLC) $(SPLC_FLAGS) -M $(SPL_MAIN_COMPOSITE) --output-directory $(OUTPUT_DIR)
 
-all: $(BUILD_DIR)/$(APP_NAME).sab
+clean:
+	$(SPLC) $(SPLC_FLAGS) -C -M $(SPL_MAIN_COMPOSITE)
+	rm -rf $(OUTPUT_DIR)
 
-# Build the Streams application bundle
-$(BUILD_DIR)/$(APP_NAME).sab:
-	@echo "Building Streams application: $(APP_NAME)"
-	@mkdir -p $(BUILD_DIR)
-	$(STREAMTOOL) mkappbundle --sab-file $(BUILD_DIR)/$(APP_NAME).sab .
-
-# Submit job to Streams instance  
-submit: $(BUILD_DIR)/$(APP_NAME).sab
-	@echo "Submitting $(APP_NAME) to Streams..."
-	$(STREAMTOOL) submitjob $(BUILD_DIR)/$(APP_NAME).sab
+# Submit to Streams instance
+submit: distributed
+	$(STREAMS_INSTALL)/bin/streamtool submitjob $(OUTPUT_DIR)/ONNXRealtime.sab
 
 # Cancel running jobs
 cancel:
-	@echo "Cancelling $(APP_NAME) jobs..."
-	$(STREAMTOOL) canceljob -f --jobname $(APP_NAME) 2>/dev/null || true
-
-# Clean build artifacts
-clean:
-	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD_DIR)
-
-# Help target
-help:
-	@echo "Available targets:"
-	@echo "  all     - Build the application bundle (.sab file)"
-	@echo "  submit  - Submit the application to Streams"
-	@echo "  cancel  - Cancel running application jobs"
-	@echo "  clean   - Remove build artifacts"
-	@echo ""
-	@echo "Usage:"
-	@echo "  make all          # Build the application"
-	@echo "  make submit       # Build and submit to Streams"
-	@echo "  make cancel clean # Stop and clean"
+	$(STREAMS_INSTALL)/bin/streamtool canceljob --jobname ONNXRealtime

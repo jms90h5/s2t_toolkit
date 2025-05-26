@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<tupleModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/tuple" class="BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl" equalitySupported="true" facade="false" splType="tuple&lt;rstring text,boolean isFinal,float64 confidence>" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <headers/>
+  <attributes>
+    <attribute>
+      <name>text</name>
+      <cppType>SPL::rstring</cppType>
+      <splType>rstring</splType>
+    </attribute>
+    <attribute>
+      <name>isFinal</name>
+      <cppType>SPL::boolean</cppType>
+      <splType>boolean</splType>
+    </attribute>
+    <attribute>
+      <name>confidence</name>
+      <cppType>SPL::float64</cppType>
+      <splType>float64</splType>
+    </attribute>
+  </attributes>
+</tupleModel>

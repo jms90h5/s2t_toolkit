@@ -5,16 +5,23 @@
 A minimal working example of the speech-to-text toolkit that actually builds and runs.
     </description>
     <uriTable>
+      <uri index="4" value="TestFileAudioSource.spl"/>
+      <uri index="3" value="TestAudioDemo.spl"/>
       <uri index="2" value="SimpleSTT.spl"/>
       <uri index="1" value="BasicDemo.spl"/>
     </uriTable>
     <namespace name="">
       <compositeOp column="11" line="15" name="BasicDemo" potentialMain="true" uriIndex="1">
-        <parameter defaultValue="&quot;./demo_models&quot;" metaType="Expression" name="modelPath" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="&quot;../../models/wenet_model&quot;" metaType="Expression" name="modelPath" optional="true" type="&lt;rstring>"/>
       </compositeOp>
       <compositeOp column="11" line="10" name="SimpleSTT" potentialMain="true" uriIndex="2">
-        <parameter defaultValue="getSubmissionTimeValue(&quot;modelPath&quot;, &quot;/path/to/model&quot;)" metaType="Expression" name="modelPath" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="getSubmissionTimeValue(&quot;modelPath&quot;, &quot;../../models/wenet_model&quot;)" metaType="Expression" name="modelPath" optional="true" type="&lt;rstring>"/>
       </compositeOp>
+      <compositeOp column="11" line="9" name="TestAudioDemo" potentialMain="true" uriIndex="3">
+        <parameter defaultValue="&quot;../../models/wenet_model&quot;" metaType="Expression" name="modelPath" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="&quot;../../test_data/audio/0.wav&quot;" metaType="Expression" name="audioFile" optional="true" type="&lt;rstring>"/>
+      </compositeOp>
+      <compositeOp column="11" line="8" name="TestFileAudioSource" potentialMain="true" uriIndex="4"/>
     </namespace>
     <dependency>
       <common:name>com.teracloud.streams.s2t</common:name>

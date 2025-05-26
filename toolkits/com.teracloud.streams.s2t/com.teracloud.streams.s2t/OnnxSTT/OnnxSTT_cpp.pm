@@ -115,7 +115,7 @@ sub main::generate($$) {
    print '    const IPort0Type& iport = static_cast<const IPort0Type&>(tuple);', "\n";
    print '    ', "\n";
    print '    // Get audio data', "\n";
-   print '    processAudioData(iport.get_audio());', "\n";
+   print '    processAudioData(iport.get_audioChunk());', "\n";
    print '    ', "\n";
    print '    // Get timestamp', "\n";
    print '    audio_timestamp_ms_ = iport.get_audioTimestamp();', "\n";
@@ -154,14 +154,10 @@ sub main::generate($$) {
    print '    // Create output tuple', "\n";
    print '    OPort0Type otuple;', "\n";
    print '    ', "\n";
-   print '    // Set attributes - adjust based on your output schema', "\n";
-   print '    // Assuming: text (rstring), isFinal (boolean), confidence (float64), ', "\n";
-   print '    //           timestamp (uint64), latencyMs (uint64)', "\n";
+   print '    // Set attributes based on output schema: text, isFinal, confidence', "\n";
    print '    otuple.set_text(result.text);', "\n";
    print '    otuple.set_isFinal(result.is_final);', "\n";
    print '    otuple.set_confidence(result.confidence);', "\n";
-   print '    otuple.set_audioTimestamp(result.timestamp_ms);', "\n";
-   print '    otuple.set_latencyMs(result.latency_ms);', "\n";
    print '    ', "\n";
    print '    // Submit the tuple', "\n";
    print '    submit(otuple, 0);', "\n";

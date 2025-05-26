@@ -25,11 +25,16 @@ void wenet_set_continuous_decoding(void* decoder, int flag);
 void wenet_set_chunk_size(void* decoder, int chunk_size);
 }
 #else
-// Real WeNet includes
-#include "wenet/api/wenet_api.h"
-#include "wenet/decoder/asr_decoder.h"
-#include "wenet/frontend/feature_pipeline.h"
+// Real WeNet includes - use dynamic loading instead
+// #include "wenet/api/wenet_api.h"
+// #include "wenet/decoder/asr_decoder.h"
+// #include "wenet/frontend/feature_pipeline.h"
 #endif
+
+// Forward declaration for dynamic loader
+namespace wenet_streams {
+    class WenetDynamicLoader;
+}
 
 namespace wenet_streams {
 
@@ -129,6 +134,9 @@ private:
     
     // Callback for results
     TranscriptionCallback* callback_;
+    
+    // Dynamic loader for WeNet functions
+    std::unique_ptr<WenetDynamicLoader> wenetLoader_;
     
     // Processing thread and synchronization
     std::thread processingThread_;

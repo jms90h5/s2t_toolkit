@@ -18,23 +18,24 @@ composite BasicDemo {
         
     graph
         // Read real audio data from test files
-        stream<blob audio, uint64 audioTimestamp> AudioStream = AudioStreamSource() {
+        stream<blob audioChunk, uint64 audioTimestamp> AudioStream = FileAudioSource() {
             param
-                audioFile: "../../test_data/audio/librispeech-1995-1837-0001.wav";
-                chunkSizeMs: 100;
+                filename: "../../test_data/audio/librispeech-1995-1837-0001.wav";
+                blockSize: 3200u;  // 100ms of 16kHz 16-bit mono audio
                 sampleRate: 16000;
-                format: "wav";
+                bitsPerSample: 16;
+                channelCount: 1;
         }
         
         // Real speech-to-text transcription using WeNet
-        stream<rstring text, boolean isFinal, float64 confidence, 
-                uint64 audioTimestamp, uint64 latencyMs> 
+        stream<rstring text, boolean isFinal, float64 confidence> 
             RealTranscription = WenetSTT(AudioStream) {
             param
                 modelPath: $modelPath;
                 sampleRate: 16000;
-                maxLatency: 300.0;
-                partialResults: true;
+                chunkSize: 16;
+                nbest: 1;
+                numThreads: 1;
         }
         
         // Display real transcription results
@@ -43,8 +44,7 @@ composite BasicDemo {
                 onTuple RealTranscription: {
                     printStringLn("Real Transcription: \"" + text + "\" " + 
                                  (isFinal ? "(FINAL)" : "(partial)") +
-                                 " [confidence: " + (rstring)(confidence * 100.0) + "%]" +
-                                 " [latency: " + (rstring)latencyMs + "ms]");
+                                 " [confidence: " + (rstring)(confidence * 100.0) + "%]");
                 }
         }
         

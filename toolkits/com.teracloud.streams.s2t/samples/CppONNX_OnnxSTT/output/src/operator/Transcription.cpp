@@ -1,4 +1,4 @@
-// QhfY_1_1QczhIaLotu3avbzb0yIp_08nptiuYjimljhayS1U0eo_0R1F2OUCFOe9sDMqqKY1lpHQCjpQX0QPmSIkDP
+// _13zCRC8DHINSLfEFqDZfxXUijQ8eSn68XMgxjhVIqvViQahDnFcHKHAKWDapMakhnhnJfufYiMK7qTFRoEFYBw
 /*
  * OnnxSTT operator implementation
  */
@@ -48,9 +48,9 @@ void MY_OPERATOR_SCOPE::MY_OPERATOR::initialize() {
     
     try {
         // Configure ONNX implementation
-        config_.encoder_onnx_path = SPL::rstring("./models/wenet_encoder.onnx");
-        config_.vocab_path = SPL::rstring("./models/vocab.txt");
-        config_.cmvn_stats_path = SPL::rstring("./models/global_cmvn.stats");
+        config_.encoder_onnx_path = SPL::rstring("../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/decoder-epoch-99-avg-1.onnx");
+        config_.vocab_path = SPL::rstring("../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/tokens.txt");
+        config_.cmvn_stats_path = SPL::rstring("models/global_cmvn.stats");
         config_.sample_rate = SPL::int32(16000);
         config_.chunk_size_ms = SPL::int32(100);
         config_.num_threads = SPL::int32(4);
@@ -87,7 +87,7 @@ void MY_OPERATOR_SCOPE::MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
     const IPort0Type& iport = static_cast<const IPort0Type&>(tuple);
     
     // Get audio data
-    processAudioData(iport.get_audio());
+    processAudioData(iport.get_audioChunk());
     
     // Get timestamp
     audio_timestamp_ms_ = iport.get_audioTimestamp();
@@ -126,14 +126,10 @@ void MY_OPERATOR_SCOPE::MY_OPERATOR::submitResult(const onnx_stt::OnnxSTTWrapper
     // Create output tuple
     OPort0Type otuple;
     
-    // Set attributes - adjust based on your output schema
-    // Assuming: text (rstring), isFinal (boolean), confidence (float64), 
-    //           timestamp (uint64), latencyMs (uint64)
+    // Set attributes based on output schema: text, isFinal, confidence
     otuple.set_text(result.text);
     otuple.set_isFinal(result.is_final);
     otuple.set_confidence(result.confidence);
-    otuple.set_audioTimestamp(result.timestamp_ms);
-    otuple.set_latencyMs(result.latency_ms);
     
     // Submit the tuple
     submit(otuple, 0);
@@ -175,11 +171,11 @@ template<class T> static void initRTC (SPL::Operator& o, T& v, const char * n) {
 MY_BASE_OPERATOR::MY_BASE_OPERATOR()
  : Operator()  {
     uint32_t index = getIndex();
-    param$encoderModel$0 = SPL::rstring("./models/wenet_encoder.onnx");
+    param$encoderModel$0 = SPL::rstring("../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/decoder-epoch-99-avg-1.onnx");
     addParameterValue ("encoderModel", SPL::ConstValueHandle(param$encoderModel$0));
-    param$vocabFile$0 = SPL::rstring("./models/vocab.txt");
+    param$vocabFile$0 = SPL::rstring("../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/tokens.txt");
     addParameterValue ("vocabFile", SPL::ConstValueHandle(param$vocabFile$0));
-    param$cmvnFile$0 = SPL::rstring("./models/global_cmvn.stats");
+    param$cmvnFile$0 = SPL::rstring("models/global_cmvn.stats");
     addParameterValue ("cmvnFile", SPL::ConstValueHandle(param$cmvnFile$0));
     param$sampleRate$0 = SPL::int32(16000);
     addParameterValue ("sampleRate", SPL::ConstValueHandle(param$sampleRate$0));

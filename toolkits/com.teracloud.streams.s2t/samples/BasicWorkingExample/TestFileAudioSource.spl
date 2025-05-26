@@ -1,0 +1,40 @@
+// Test FileAudioSource operator without STT dependency
+
+use com.teracloud.streams.s2t::*;
+
+/**
+ * TestFileAudioSource - Verify FileAudioSource works correctly
+ */
+composite TestFileAudioSource {
+    graph
+        // Test reading audio from raw PCM file
+        stream<blob audioChunk, uint64 audioTimestamp> AudioStream = FileAudioSource() {
+            param
+                filename: "/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/test_data/audio/librispeech-1995-1837-0001.raw";
+                blockSize: 3200u;  // 100ms of 16kHz 16-bit mono audio
+                sampleRate: 16000;
+                bitsPerSample: 16;
+                channelCount: 1;
+        }
+        
+        // Display audio chunks
+        () as Display = Custom(AudioStream) {
+            logic
+                state: {
+                    mutable int32 chunkCount = 0;
+                }
+                
+                onTuple AudioStream: {
+                    chunkCount++;
+                    printStringLn("Audio chunk " + (rstring)chunkCount + 
+                                 ": size=" + (rstring)size(audioChunk) + 
+                                 " bytes, timestamp=" + (rstring)audioTimestamp + "ms");
+                    
+                    // Stop after 10 chunks to verify it's working
+                    if (chunkCount >= 10) {
+                        printStringLn("✓ FileAudioSource is working correctly!");
+                        printStringLn("Successfully read " + (rstring)chunkCount + " audio chunks");
+                    }
+                }
+        }
+}

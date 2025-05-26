@@ -1,4 +1,4 @@
-// TqYu_18l7xeo3HjnrhCtzKBNYDyKj8ThOf7nIjM5IlGr9GMJ7IGor2H3pyyG1Y46c_1HoLmKavdg_1ZP3DeVg0jBG
+// VpmDpNjOR5z3vpJPFYxjXRCJdXV9h5BxHzn0roLYzWpO0bey9jeD4h2rvTHg3C0W3Rvx4uSGyx6okTLpjTJXAd
 
 
 #ifndef SPL_OPER_INSTANCE_RESULTDISPLAY_H_
@@ -16,7 +16,7 @@
 #include <SPL/Runtime/Utility/CV.h>
 using namespace UTILS_NAMESPACE;
 
-#include "../type/BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm.h"
+#include "../type/BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl.h"
 
 
 #define MY_OPERATOR ResultDisplay$OP
@@ -30,7 +30,7 @@ class MY_BASE_OPERATOR : public Operator
 {
 public:
     
-    typedef SPL::BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm IPort0Type;
+    typedef SPL::BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl IPort0Type;
     
     MY_BASE_OPERATOR();
     
@@ -64,23 +64,15 @@ public:
     SPL::rstring lit$2;
     SPL::rstring lit$3;
     SPL::rstring lit$4;
-    SPL::rstring lit$5;
-    SPL::rstring lit$6;
-    SPL::uint64 lit$7;
-    SPL::uint64 lit$8;
+    SPL::uint64 lit$5;
+    SPL::uint64 lit$6;
+    SPL::rstring lit$7;
+    SPL::rstring lit$8;
     SPL::rstring lit$9;
-    SPL::rstring lit$10;
-    SPL::rstring lit$11;
-    SPL::rstring lit$12;
-    SPL::rstring lit$13;
-    SPL::rstring lit$14;
-    SPL::rstring lit$15;
-    SPL::rstring lit$16;
-    SPL::rstring lit$17;
-    SPL::uint64 lit$18;
-    SPL::uint64 lit$19;
-    SPL::uint64 lit$20;
-    SPL::uint64 lit$21;
+    SPL::uint64 lit$10;
+    SPL::uint64 lit$11;
+    SPL::uint64 lit$12;
+    SPL::uint64 lit$13;
     
     SPL::uint64 state$resultCount;
     SPL::uint64 state$totalLatency;

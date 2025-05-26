@@ -1,3 +1,0 @@
-	@$(CXX_LN) $(SPL_CXXFLAGS) -o bin/CompletionMonitor.so -fPIC -shared $(SOCompletionMonitor) $(SPL_LDFLAGS)\
-	    build/operator/CompletionMonitor.o \
-	    build/type/BpSUw8mfEcWf02DHxFXcAEfeiSinvo2iyOrm4KEfBRvnHy4jMGnM6au_0nCr0kf7SJp_1QitTcsqIopJSCi7aPgAg.o 

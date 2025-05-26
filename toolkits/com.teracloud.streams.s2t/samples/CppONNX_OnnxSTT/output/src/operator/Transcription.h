@@ -1,4 +1,4 @@
-// QhfY_1_1QczhIaLotu3avbzb0yIp_08nptiuYjimljhayS1U0eo_0R1F2OUCFOe9sDMqqKY1lpHQCjpQX0QPmSIkDP
+// _13zCRC8DHINSLfEFqDZfxXUijQ8eSn68XMgxjhVIqvViQahDnFcHKHAKWDapMakhnhnJfufYiMK7qTFRoEFYBw
 // Additional includes for OnnxSTT operator
 #include "../../impl/include/OnnxSTTWrapper.hpp"
 #include <memory>
@@ -18,8 +18,8 @@
 #include <SPL/Runtime/Utility/CV.h>
 using namespace UTILS_NAMESPACE;
 
-#include "../type/BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm.h"
-#include "../type/BWS8pWC_1HYKrTViSTcG4T5GFz_0nGxqvmNlrajI9k_1E5zHNl9YbvsoTe9P3EfS_0f6OzRd8ZZzCJBaSXCG5A8XGA6.h"
+#include "../type/BJnZ5CG7dYuCzMUhZJwzAL3_0GdbQo3dSshe140tlHizvLTKJjeJwGLYVXIY0saSuxtDflHAbgU4Wsd74BTRfIBC.h"
+#include "../type/BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl.h"
 
 #include <bitset>
 
@@ -34,8 +34,8 @@ class MY_BASE_OPERATOR : public Operator
 {
 public:
     
-    typedef SPL::BWS8pWC_1HYKrTViSTcG4T5GFz_0nGxqvmNlrajI9k_1E5zHNl9YbvsoTe9P3EfS_0f6OzRd8ZZzCJBaSXCG5A8XGA6 IPort0Type;
-    typedef SPL::BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm OPort0Type;
+    typedef SPL::BJnZ5CG7dYuCzMUhZJwzAL3_0GdbQo3dSshe140tlHizvLTKJjeJwGLYVXIY0saSuxtDflHAbgU4Wsd74BTRfIBC IPort0Type;
+    typedef SPL::BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl OPort0Type;
     
     MY_BASE_OPERATOR();
     

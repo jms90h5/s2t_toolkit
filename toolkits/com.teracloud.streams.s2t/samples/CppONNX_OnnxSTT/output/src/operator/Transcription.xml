@@ -34,8 +34,8 @@
     <networkByteOrdering>false</networkByteOrdering>
     <codeBeautification>false</codeBeautification>
     <includes>
-      <include>"../type/BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm.h"</include>
-      <include>"../type/BWS8pWC_1HYKrTViSTcG4T5GFz_0nGxqvmNlrajI9k_1E5zHNl9YbvsoTe9P3EfS_0f6OzRd8ZZzCJBaSXCG5A8XGA6.h"</include>
+      <include>"../type/BJnZ5CG7dYuCzMUhZJwzAL3_0GdbQo3dSshe140tlHizvLTKJjeJwGLYVXIY0saSuxtDflHAbgU4Wsd74BTRfIBC.h"</include>
+      <include>"../type/BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl.h"</include>
     </includes>
     <stateVariables/>
     <runtimeConstants/>
@@ -55,8 +55,8 @@
           <cppType>SPL::rstring</cppType>
           <splType>rstring</splType>
           <hasRuntimeConstant>false</hasRuntimeConstant>
-          <cppExpression>SPL::rstring("./models/wenet_encoder.onnx")</cppExpression>
-          <splExpression>"./models" + "/wenet_encoder.onnx"</splExpression>
+          <cppExpression>SPL::rstring("../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/decoder-epoch-99-avg-1.onnx")</cppExpression>
+          <splExpression>"../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/decoder-epoch-99-avg-1.onnx"</splExpression>
           <hasFunctions>false</hasFunctions>
           <hasSideEffects>false</hasSideEffects>
           <readsState>false</readsState>
@@ -64,14 +64,14 @@
           <parameterExpressionMode>AttributeFree</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>13</line>
-            <column>41</column>
+            <line>30</line>
+            <column>31</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>31</line>
+        <line>30</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -82,8 +82,8 @@
           <cppType>SPL::rstring</cppType>
           <splType>rstring</splType>
           <hasRuntimeConstant>false</hasRuntimeConstant>
-          <cppExpression>SPL::rstring("./models/vocab.txt")</cppExpression>
-          <splExpression>"./models" + "/vocab.txt"</splExpression>
+          <cppExpression>SPL::rstring("../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/tokens.txt")</cppExpression>
+          <splExpression>"../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/tokens.txt"</splExpression>
           <hasFunctions>false</hasFunctions>
           <hasSideEffects>false</hasSideEffects>
           <readsState>false</readsState>
@@ -91,14 +91,14 @@
           <parameterExpressionMode>AttributeFree</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>13</line>
-            <column>41</column>
+            <line>31</line>
+            <column>28</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>32</line>
+        <line>31</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -109,8 +109,8 @@
           <cppType>SPL::rstring</cppType>
           <splType>rstring</splType>
           <hasRuntimeConstant>false</hasRuntimeConstant>
-          <cppExpression>SPL::rstring("./models/global_cmvn.stats")</cppExpression>
-          <splExpression>"./models" + "/global_cmvn.stats"</splExpression>
+          <cppExpression>SPL::rstring("models/global_cmvn.stats")</cppExpression>
+          <splExpression>"models/global_cmvn.stats"</splExpression>
           <hasFunctions>false</hasFunctions>
           <hasSideEffects>false</hasSideEffects>
           <readsState>false</readsState>
@@ -118,14 +118,14 @@
           <parameterExpressionMode>AttributeFree</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>13</line>
-            <column>41</column>
+            <line>32</line>
+            <column>27</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>33</line>
+        <line>32</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -145,14 +145,14 @@
           <parameterExpressionMode>AttributeFree</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>34</line>
+            <line>33</line>
             <column>29</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>34</line>
+        <line>33</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -172,14 +172,14 @@
           <parameterExpressionMode>AttributeFree</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>35</line>
+            <line>34</line>
             <column>30</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>35</line>
+        <line>34</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -199,14 +199,14 @@
           <parameterExpressionMode>AttributeFree</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>36</line>
+            <line>35</line>
             <column>27</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>36</line>
+        <line>35</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -226,14 +226,14 @@
           <parameterExpressionMode>AttributeFree</parameterExpressionMode>
           <sourceLocation>
             <file>ONNXRealtime.spl</file>
-            <line>37</line>
+            <line>36</line>
             <column>29</column>
           </sourceLocation>
         </value>
       </values>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>37</line>
+        <line>36</line>
         <column>17</column>
       </sourceLocation>
     </parameter>
@@ -242,18 +242,18 @@
     <inputPort>
       <index>0</index>
       <tupleCppName>iport$0</tupleCppName>
-      <tupleCppType>SPL::BWS8pWC_1HYKrTViSTcG4T5GFz_0nGxqvmNlrajI9k_1E5zHNl9YbvsoTe9P3EfS_0f6OzRd8ZZzCJBaSXCG5A8XGA6</tupleCppType>
-      <tupleSPLType>tuple&lt;blob audio,uint64 audioTimestamp&gt;</tupleSPLType>
+      <tupleCppType>SPL::BJnZ5CG7dYuCzMUhZJwzAL3_0GdbQo3dSshe140tlHizvLTKJjeJwGLYVXIY0saSuxtDflHAbgU4Wsd74BTRfIBC</tupleCppType>
+      <tupleSPLType>tuple&lt;blob audioChunk,uint64 audioTimestamp&gt;</tupleSPLType>
       <facade>false</facade>
       <mutationAllowed>false</mutationAllowed>
       <sourceLocation>
         <file>ONNXRealtime.spl</file>
-        <line>29</line>
+        <line>28</line>
         <column>37</column>
       </sourceLocation>
       <attributes>
         <attribute>
-          <name>audio</name>
+          <name>audioChunk</name>
           <cppType>SPL::blob</cppType>
           <splType>blob</splType>
         </attribute>
@@ -264,7 +264,7 @@
         </attribute>
       </attributes>
       <tuple>
-        <tt:attr name="audio" type="blob"/>
+        <tt:attr name="audioChunk" type="blob"/>
         <tt:attr name="audioTimestamp" type="uint64"/>
       </tuple>
     </inputPort>
@@ -273,8 +273,8 @@
     <outputPort>
       <index>0</index>
       <tupleCppName>oport$0</tupleCppName>
-      <tupleCppType>SPL::BFnw1L8VHTxQVFSKqgwlm0fQwKSYjgcr1gowQXqI29YclLU3jp63B_1ncbCBOZPDW0UpaMIFMq2yz9b9B8KqeGAm</tupleCppType>
-      <tupleSPLType>tuple&lt;rstring text,boolean isFinal,float64 confidence,uint64 audioTimestamp,uint64 latencyMs&gt;</tupleSPLType>
+      <tupleCppType>SPL::BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl</tupleCppType>
+      <tupleSPLType>tuple&lt;rstring text,boolean isFinal,float64 confidence&gt;</tupleSPLType>
       <facade>false</facade>
       <mutationAllowed>true</mutationAllowed>
       <sourceLocation>
@@ -298,23 +298,11 @@
           <cppType>SPL::float64</cppType>
           <splType>float64</splType>
         </attribute>
-        <attribute>
-          <name>audioTimestamp</name>
-          <cppType>SPL::uint64</cppType>
-          <splType>uint64</splType>
-        </attribute>
-        <attribute>
-          <name>latencyMs</name>
-          <cppType>SPL::uint64</cppType>
-          <splType>uint64</splType>
-        </attribute>
       </attributes>
       <tuple>
         <tt:attr name="text" type="rstring"/>
         <tt:attr name="isFinal" type="boolean"/>
         <tt:attr name="confidence" type="float64"/>
-        <tt:attr name="audioTimestamp" type="uint64"/>
-        <tt:attr name="latencyMs" type="uint64"/>
       </tuple>
       <finalPunctuationPortScope>
         <port>0</port>

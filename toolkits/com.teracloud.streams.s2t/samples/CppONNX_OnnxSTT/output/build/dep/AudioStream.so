@@ -1,3 +1,0 @@
-	@$(CXX_LN) $(SPL_CXXFLAGS) -o bin/AudioStream.so -fPIC -shared $(SOAudioStream) $(SPL_LDFLAGS)\
-	    build/operator/AudioStream.o \
-	    build/type/BWS8pWC_1HYKrTViSTcG4T5GFz_0nGxqvmNlrajI9k_1E5zHNl9YbvsoTe9P3EfS_0f6OzRd8ZZzCJBaSXCG5A8XGA6.o 

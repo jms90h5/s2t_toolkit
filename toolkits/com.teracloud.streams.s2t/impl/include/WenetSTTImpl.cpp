@@ -1,4 +1,5 @@
 #include "WenetSTTImpl.hpp"
+#include "WenetDynamicLoader.hpp"
 #include <iostream>
 #include <cmath>
 #include <algorithm>
@@ -10,6 +11,7 @@ namespace wenet_streams {
 WenetSTTImpl::WenetSTTImpl(const WeNetConfig& config, TranscriptionCallback* callback)
     : config_(config), 
       callback_(callback),
+      wenetLoader_(std::make_unique<WenetDynamicLoader>()),
       running_(false),
       shouldFlush_(false),
       wenetDecoder_(nullptr),
@@ -28,28 +30,31 @@ WenetSTTImpl::~WenetSTTImpl() {
     }
     
     // Free the WeNet decoder
-    if (wenetDecoder_ != nullptr) {
-        wenet_free(wenetDecoder_);
+    if (wenetDecoder_ != nullptr && wenetLoader_) {
+        wenetLoader_->wenet_free(wenetDecoder_);
         wenetDecoder_ = nullptr;
     }
 }
 
 bool WenetSTTImpl::initialize() {
     // Initialize the WeNet decoder
-    wenetDecoder_ = wenet_init(config_.modelPath.c_str());
+    if (!wenetLoader_) {
+        return false;
+    }
+    wenetDecoder_ = wenetLoader_->wenet_init(config_.modelPath.c_str());
     if (wenetDecoder_ == nullptr) {
         callback_->onError("Failed to initialize WeNet decoder");
         return false;
     }
     
     // Configure the decoder
-    wenet_set_chunk_size(wenetDecoder_, static_cast<int>(config_.maxChunkDuration * config_.sampleRate));
+    wenetLoader_->wenet_set_chunk_size(wenetDecoder_, static_cast<int>(config_.maxChunkDuration * config_.sampleRate));
     
     // Enable continuous decoding for streaming
-    wenet_set_continuous_decoding(wenetDecoder_, 1);
+    wenetLoader_->wenet_set_continuous_decoding(wenetDecoder_, 1);
     
     // Set to output word timestamps if needed
-    wenet_set_timestamp(wenetDecoder_, 1);
+    wenetLoader_->wenet_set_timestamp(wenetDecoder_, 1);
     
     // Start the processing thread
     running_ = true;
@@ -119,7 +124,7 @@ void WenetSTTImpl::processingThread() {
             if (isSpeech) {
                 // If this is new speech after silence, reset the decoder state
                 if (!speechDetected_) {
-                    wenet_reset(wenetDecoder_);
+                    wenetLoader_->wenet_reset(wenetDecoder_);
                     speechDetected_ = true;
                 }
                 
@@ -135,7 +140,7 @@ void WenetSTTImpl::processingThread() {
                     int isLast = shouldFlush_ ? 1 : 0;
                     
                     // Decode with WeNet
-                    const char* result = wenet_decode(wenetDecoder_, audioData, dataSize, isLast);
+                    const char* result = wenetLoader_->wenet_decode(wenetDecoder_, audioData, dataSize, isLast);
                     
                     // Parse and handle the result
                     if (result != nullptr) {
@@ -151,7 +156,7 @@ void WenetSTTImpl::processingThread() {
                     // If this was the last chunk, reset the buffer
                     if (isLast) {
                         currentBuffer_.clear();
-                        wenet_reset(wenetDecoder_);
+                        wenetLoader_->wenet_reset(wenetDecoder_);
                     }
                     // Otherwise, keep a portion of the buffer for context
                     else if (currentBuffer_.size() > samplesNeeded) {
@@ -171,7 +176,7 @@ void WenetSTTImpl::processingThread() {
                     int dataSize = currentBuffer_.size() * sizeof(int16_t);
                     
                     // Decode with WeNet as final result
-                    const char* result = wenet_decode(wenetDecoder_, audioData, dataSize, 1);
+                    const char* result = wenetLoader_->wenet_decode(wenetDecoder_, audioData, dataSize, 1);
                     
                     // Parse and send a final result
                     TranscriptionResult finalResult("Final transcription after silence", true, 0.95, lastTimestamp_);
@@ -179,7 +184,7 @@ void WenetSTTImpl::processingThread() {
                     
                     // Reset state for next utterance
                     currentBuffer_.clear();
-                    wenet_reset(wenetDecoder_);
+                    wenetLoader_->wenet_reset(wenetDecoder_);
                 }
                 
                 speechDetected_ = false;
@@ -193,7 +198,7 @@ void WenetSTTImpl::processingThread() {
             int dataSize = currentBuffer_.size() * sizeof(int16_t);
             
             // Decode with WeNet as final result
-            const char* result = wenet_decode(wenetDecoder_, audioData, dataSize, 1);
+            const char* result = wenetLoader_->wenet_decode(wenetDecoder_, audioData, dataSize, 1);
             
             // Send a final result
             TranscriptionResult finalResult("Final transcription from flush", true, 0.95, lastTimestamp_);
@@ -201,7 +206,7 @@ void WenetSTTImpl::processingThread() {
             
             // Reset state
             currentBuffer_.clear();
-            wenet_reset(wenetDecoder_);
+            wenetLoader_->wenet_reset(wenetDecoder_);
             shouldFlush_ = false;
         }
     }

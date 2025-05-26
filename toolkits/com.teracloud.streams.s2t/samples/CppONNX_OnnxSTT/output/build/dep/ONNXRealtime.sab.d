@@ -2,6 +2,7 @@ ONNXRealtime.sab: \
   /homes/jsharpe/teracloud/streams/7.2.0.0/toolkits/spl/impl/bin/PythonOp_vmpath.sh \
   /homes/jsharpe/teracloud/streams/7.2.0.0/toolkits/spl/doc/en_US/spldoc/html/commonltr.css \
   /homes/jsharpe/teracloud/streams/7.2.0.0/toolkits/spl/toolkit.xml \
+  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/BasicWorkingExample/test_output/etc/adl \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/BasicWorkingExample/output/etc/adl \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/BasicWorkingExample/toolkit.xml \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppONNX_OnnxSTT/toolkit.xml \
@@ -324,12 +325,11 @@ ONNXRealtime.sab: \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/standalone/wenet_build/wenet/test/resources/librispeech.train_960_unigram5000.bpemodel \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/standalone/wenet_build/wenet/test/resources/librispeech.words.txt \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/standalone/wenet_build/wenet/tools/parse_options.sh \
-  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/standalone/cpp_implementation/lib/libwenet.so \
-  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/standalone/cpp_implementation/lib/mock_wenet.cpp \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/etc/audio-simulator.sh \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/etc/run-transcriber.sh \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/etc/viewer.html \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/toolkit.xml \
+  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/output/etc/adl \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/include/wenet/core/cmake/libtorch.cmake \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/include/wenet/core/kaldi/base/io-funcs-inl.h \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/include/wenet/core/kaldi/decoder/lattice-faster-online-decoder.cc \
@@ -355,7 +355,6 @@ ONNXRealtime.sab: \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/lib/libonnxruntime.so.1.16.3 \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/lib/libwenetcpp.cpp \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/lib/libwenetcpp.so \
-  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/lib/libwenetonnx.so \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/libs2t_impl.so \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/download_models.sh \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/toolkit.xml \
@@ -365,4 +364,7 @@ ONNXRealtime.sab: \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/deps/onnxruntime/include/onnxruntime_cxx_inline.h \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/deps/onnxruntime/include/onnxruntime_session_options_config_keys.h \
   /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/deps/onnxruntime/lib/libonnxruntime.so \
-  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/deps/onnxruntime/lib/libonnxruntime.so.1.16.3
+  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/deps/onnxruntime/lib/libonnxruntime.so.1.16.3 \
+  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/models/librispeech_model.tar.gz \
+  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/test_data/audio/librispeech-1995-1837-0001.wav \
+  /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/test_data/audio/librispeech-1995-1837-0001.raw
