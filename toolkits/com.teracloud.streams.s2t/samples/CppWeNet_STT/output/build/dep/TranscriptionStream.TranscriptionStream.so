@@ -1,0 +1,4 @@
+	@$(CXX_LN) $(SPL_CXXFLAGS) -o bin/TranscriptionStream.TranscriptionStream.so -fPIC -shared $(SOTranscriptionStream.TranscriptionStream) -L /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl -Wl,-rpath -Wl,\$$ORIGIN/../toolkits/com.teracloud.streams.s2t/impl -ls2t_impl $(SPL_LDFLAGS)\
+	    build/operator/TranscriptionStream/TranscriptionStream.o \
+	    build/type/BJnZ5CG7dYuCzMUhZJwzAL3_0GdbQo3dSshe140tlHizvLTKJjeJwGLYVXIY0saSuxtDflHAbgU4Wsd74BTRfIBC.o \
+	    build/type/BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl.o 

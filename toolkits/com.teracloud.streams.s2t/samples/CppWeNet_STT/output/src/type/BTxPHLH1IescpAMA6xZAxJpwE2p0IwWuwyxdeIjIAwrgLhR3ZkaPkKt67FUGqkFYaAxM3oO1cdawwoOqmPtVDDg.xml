@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<tupleModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/tuple" class="BTxPHLH1IescpAMA6xZAxJpwE2p0IwWuwyxdeIjIAwrgLhR3ZkaPkKt67FUGqkFYaAxM3oO1cdawwoOqmPtVDDg" equalitySupported="true" facade="false" splType="tuple&lt;rstring transcription,float64 confidence,uint64 audioTimestamp>" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <headers/>
+  <attributes>
+    <attribute>
+      <name>transcription</name>
+      <cppType>SPL::rstring</cppType>
+      <splType>rstring</splType>
+    </attribute>
+    <attribute>
+      <name>confidence</name>
+      <cppType>SPL::float64</cppType>
+      <splType>float64</splType>
+    </attribute>
+    <attribute>
+      <name>audioTimestamp</name>
+      <cppType>SPL::uint64</cppType>
+      <splType>uint64</splType>
+    </attribute>
+  </attributes>
+</tupleModel>

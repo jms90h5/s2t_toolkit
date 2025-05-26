@@ -23,10 +23,10 @@ This toolkit is designed for scenarios requiring low-latency speech-to-text capa
 ## Key Components
 
 - **WenetSTT**: Primary operator for real-time speech recognition using WeNet C++ API
-- **WenetONNX**: New operator for real-time speech recognition using ONNX Runtime (recommended)
+- **OnnxSTT**: New operator for real-time speech recognition using ONNX Runtime (recommended)
 - **AudioStreamSource**: Operator for ingesting streaming audio
 - **WebSocketSink**: Operator for streaming transcription results
-- **WenetRealtimeSTT**: Composite operator demonstrating real-time STT pipeline
+- **WenetSpeechToText**: Composite operator demonstrating real-time STT pipeline
 
 ## Prerequisites
 
@@ -36,15 +36,30 @@ This toolkit is designed for scenarios requiring low-latency speech-to-text capa
   - WeNet runtime library dependencies
   - CMake 3.14 or higher for building the toolkit
   - LibTorch (PyTorch C++ libraries) for WeNet
-- For WenetONNX operator (recommended):
+- For OnnxSTT operator (recommended):
   - ONNX Runtime 1.16.3 or higher
   - WeNet model exported to ONNX format
 
-## Installing WeNet Dependencies
+## Setup and Installation
 
-### Option 1: Automatic Installation
+### ONNX Implementation (Recommended)
 
-The toolkit includes a script to automatically download and install WeNet dependencies:
+For the best performance and deployment simplicity, use the ONNX-based implementation:
+
+```bash
+# 1. Setup ONNX Runtime
+./setup_onnx_runtime.sh
+
+# 2. Setup kaldi-native-fbank (for production-quality features)
+./setup_kaldi_fbank.sh
+
+# 3. Build the toolkit
+make -f CMakeLists_ONNX.txt
+```
+
+### WeNet C++ Implementation (Legacy)
+
+For the original WeNet implementation:
 
 ```bash
 # Install WeNet dependencies
@@ -60,7 +75,7 @@ This script will:
 3. Set up the build environment
 4. Optionally download a pre-trained model for English or Chinese
 
-### Option 2: Manual Installation
+### Manual Installation
 
 If you already have WeNet installed or prefer to manage dependencies yourself:
 
@@ -87,10 +102,15 @@ If WeNet is already installed on your system, you can point the toolkit to it wh
 ./build.sh --clean --wenet-path /path/to/wenet --torch-path /path/to/libtorch
 ```
 
-### Required Dependencies
+### Dependencies
 
-WeNet requires the following dependencies:
+#### For ONNX Implementation (Recommended):
+- **CMake**: Version 3.14 or higher
+- **ONNX Runtime**: 1.16.3 or higher (automatically downloaded)
+- **kaldi-native-fbank**: For feature extraction (automatically built)
+- **CUDA** (optional): For GPU acceleration with CUDA/TensorRT providers
 
+#### For WeNet Implementation:
 - **CMake**: Version 3.14 or higher
 - **LibTorch**: PyTorch C++ libraries (version 2.0 or higher recommended)
 - **CUDA** (optional): For GPU acceleration
@@ -100,7 +120,7 @@ WeNet requires the following dependencies:
 
 ## ONNX Runtime Support (Recommended)
 
-The toolkit now includes a WenetONNX operator that uses ONNX Runtime for inference, eliminating the dependency on WeNet C++ API and LibTorch. This approach offers several advantages:
+The toolkit now includes a OnnxSTT operator that uses ONNX Runtime for inference, eliminating the dependency on WeNet C++ API and LibTorch. This approach offers several advantages:
 
 - **Simplified deployment**: No need for WeNet or PyTorch dependencies
 - **Better performance**: ONNX Runtime optimizations for CPU and GPU
@@ -139,7 +159,7 @@ This installs kaldi-native-fbank in the `deps/kaldi-native-fbank` directory. The
 
 ### Exporting WeNet Models to ONNX
 
-To use the WenetONNX operator, you need to export your WeNet model to ONNX format:
+To use the OnnxSTT operator, you need to export your WeNet model to ONNX format:
 
 ```python
 # Example script to export WeNet model to ONNX
@@ -164,11 +184,11 @@ torch.onnx.export(
 )
 ```
 
-### Using the WenetONNX Operator
+### Using the OnnxSTT Operator
 
 ```spl
 stream<rstring text, boolean isFinal, float64 confidence> Transcription = 
-    WenetONNX(AudioStream) {
+    OnnxSTT(AudioStream) {
         param
             encoderModel: "models/encoder.onnx";
             vocabFile: "models/units.txt";
@@ -180,7 +200,7 @@ stream<rstring text, boolean isFinal, float64 confidence> Transcription =
 
 ## Building the Toolkit
 
-### For WenetONNX Operator (Recommended)
+### For OnnxSTT Operator (Recommended)
 
 ```bash
 # 1. Install dependencies
@@ -228,7 +248,7 @@ This toolkit follows a **build once, deploy anywhere** approach. After the initi
 
 ### 1. Install Dependencies and Build the Toolkit
 
-#### For WenetONNX (Recommended)
+#### For OnnxSTT (Recommended)
 
 ```bash
 # Step 1: Download and install dependencies (one-time setup)
@@ -253,7 +273,7 @@ This toolkit follows a **build once, deploy anywhere** approach. After the initi
 
 ### 2. Create a Real-time Transcription Application
 
-#### Using WenetONNX (Recommended)
+#### Using OnnxSTT (Recommended)
 
 ```spl
 composite RealtimeTranscriber {
@@ -272,7 +292,7 @@ composite RealtimeTranscriber {
         }
         
         stream<rstring text, boolean isFinal, float64 confidence> Transcription = 
-            WenetONNX(AudioStream) {
+            OnnxSTT(AudioStream) {
                 param
                     encoderModel: $encoderModel;
                     vocabFile: $vocabFile;
@@ -309,7 +329,7 @@ sc -M RealtimeTranscriber -t /path/to/com.teracloud.streams.s2t
 # The resulting .sab file contains all necessary libraries - no additional 
 # installation needed on runtime nodes!
 
-# Run with WenetONNX
+# Run with OnnxSTT
 streamtool submitjob output/RealtimeTranscriber.sab \
     -P encoderModel=~/wenet_models/encoder.onnx \
     -P vocabFile=~/wenet_models/units.txt \
@@ -323,6 +343,21 @@ streamtool submitjob output/RealtimeTranscriber.sab \
 
 **Note**: The toolkit is self-contained. After building the toolkit, all dependencies (ONNX Runtime, kaldi-native-fbank, etc.) are packaged with your application. You don't need to install these libraries on your Streams runtime nodes.
 
+## Self-Contained Design ✨
+
+**NEW**: The toolkit is now completely self-contained with real data and models:
+
+- **No External Dependencies**: All models and test data included in toolkit directory
+- **Real Audio Processing**: All samples use actual WAV files (LibriSpeech, AISHELL, bilingual samples)
+- **Real Model Inference**: Uses trained WeNet/ONNX models with authentic CMVN statistics
+- **Production-Ready**: Same data pipeline as production systems
+
+### Included Test Data (`test_data/`)
+- Real WAV audio files for testing (English, Chinese, bilingual)
+- Complete WeNet model with real CMVN normalization statistics
+- ONNX models for CPU/GPU acceleration
+- No mock data anywhere - 100% real processing
+
 ## Sample Applications
 
 The toolkit includes multiple sample applications demonstrating different implementation approaches:
@@ -330,16 +365,18 @@ The toolkit includes multiple sample applications demonstrating different implem
 ### Sample Naming Convention
 Samples follow the pattern: `<Language><Technology>_<OperatorName>/`
 
+- **BasicWorkingExample**: Simple demos using real audio files and models
+- **CppONNX_OnnxSTT**: C++ using the OnnxSTT operator (ONNX Runtime)
+- **CppWeNet_STT**: C++ using the WenetSTT operator (full WeNet runtime)
 - **PythonONNX_MultiOperator**: Python with ONNX Runtime (multi-operator approach)
-- **PythonONNX_SingleOperator**: Python with ONNX Runtime (single operator, optimized)
-- **CppONNX_WenetONNX**: C++ using the WenetONNX operator (ONNX Runtime)
-- **CppWeNet_WenetSTT**: C++ using the WenetSTT operator (full WeNet runtime)
 
 Each sample demonstrates:
-- Streaming audio ingestion
+- **Real audio file processing** (no mock data)
 - Real-time transcription with incremental results
 - Different latency-accuracy tradeoffs
 - Integration patterns for production use
+
+**All samples now use real data**: LibriSpeech and AISHELL audio files with trained models.
 
 See `samples/README.md` for detailed descriptions of each approach.
 
@@ -349,7 +386,7 @@ This toolkit is designed for real-time speech recognition with target latencies 
 
 | Implementation | Latency | Best For |
 |----------------|---------|----------|
-| **WenetONNX** (C++ ONNX) | ~100-150ms | Production deployments requiring portability |
+| **OnnxSTT** (C++ ONNX) | ~100-150ms | Production deployments requiring portability |
 | **WenetSTT** (C++ WeNet) | ~100-150ms | Full WeNet features and existing infrastructure |
 | **Python ONNX** | ~150-300ms | Prototyping and research |
 
@@ -387,7 +424,7 @@ For detailed performance tuning, see [docs/IMPLEMENTATION_DETAILS.md](docs/IMPLE
    - Check that vocabulary and CMVN files match the model
    - Verify the model supports dynamic batch sizes
 
-6. **Feature extraction errors with WenetONNX**:
+6. **Feature extraction errors with OnnxSTT**:
    - Run `./setup_kaldi_fbank.sh` to install kaldi-native-fbank
    - Check that `deps/kaldi-native-fbank/lib/libkaldi-native-fbank-core.so` exists
    - Verify the library is properly linked: `ldd impl/lib/libwenetonnx.so | grep kaldi`
@@ -395,7 +432,7 @@ For detailed performance tuning, see [docs/IMPLEMENTATION_DETAILS.md](docs/IMPLE
 
 ### Verifying Installation
 
-#### For WenetONNX:
+#### For OnnxSTT:
 
 ```bash
 # Check that all dependencies are properly linked

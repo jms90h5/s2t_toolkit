@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<applicationSet xmlns="http://www.ibm.com/xmlns/prod/streams/application/v4200" name="com.teracloud.streams.s2t.sample::RealtimeTranscriber.appset" xmlns:tt="http://www.ibm.com/xmlns/prod/streams/spl/tupleType" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <description>com.teracloud.streams.s2t.sample::RealtimeTranscriber application set</description>
+  <splApplication adlPath="output/com.teracloud.streams.s2t.sample.RealtimeTranscriber.adl" applicationDirectory="toolkits/RealtimeTranscriber" applicationScope="Default" avoidRuntimeYield="auto" buildId="" bundle="./com.teracloud.streams.s2t.sample.RealtimeTranscriber.sab" checkpointDirectory="/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/data/ckpt" name="com.teracloud.streams.s2t.sample::RealtimeTranscriber" outputDirectory="output" productVersion="7.2.0.0" standaloneApplicationDirectory="toolkits/RealtimeTranscriber" version="1.0.0">
+    <libraries/>
+    <hostpools>
+      <hostpool index="0" membershipMode="shared" name="$default"/>
+    </hostpools>
+    <tupleTypes>
+      <tupleType index="0">
+        <attribute name="audioChunk" type="blob"/>
+        <attribute name="audioTimestamp" type="uint64"/>
+        <tuple>
+          <tt:attr name="audioChunk" type="blob"/>
+          <tt:attr name="audioTimestamp" type="uint64"/>
+        </tuple>
+      </tupleType>
+      <tupleType index="1">
+        <attribute name="text" type="rstring"/>
+        <attribute name="isFinal" type="boolean"/>
+        <attribute name="confidence" type="float64"/>
+        <tuple>
+          <tt:attr name="text" type="rstring"/>
+          <tt:attr name="isFinal" type="boolean"/>
+          <tt:attr name="confidence" type="float64"/>
+        </tuple>
+      </tupleType>
+      <tupleType index="2">
+        <attribute name="transcription" type="rstring"/>
+        <attribute name="confidence" type="float64"/>
+        <attribute name="audioTimestamp" type="uint64"/>
+        <tuple>
+          <tt:attr name="transcription" type="rstring"/>
+          <tt:attr name="confidence" type="float64"/>
+          <tt:attr name="audioTimestamp" type="uint64"/>
+        </tuple>
+      </tupleType>
+    </tupleTypes>
+    <primitiveOperDefinitions>
+      <primitiveOperDefinition index="0" kind="spl.utility::Beacon" runtimeType="SPL_CPlusPlus" toolkitIndex="1"/>
+      <primitiveOperDefinition index="1" kind="com.teracloud.streams.s2t::WenetSTT" runtimeType="SPL_CPlusPlus" toolkitIndex="2"/>
+      <primitiveOperDefinition index="2" kind="spl.adapter::FileSink" runtimeType="SPL_CPlusPlus" toolkitIndex="1">
+        <customMetricIndicies>
+          <customMetricIndex>0</customMetricIndex>
+          <customMetricIndex>1</customMetricIndex>
+        </customMetricIndicies>
+      </primitiveOperDefinition>
+      <primitiveOperDefinition index="3" kind="spl.utility::Custom" runtimeType="SPL_CPlusPlus" toolkitIndex="1"/>
+    </primitiveOperDefinitions>
+    <composites>
+      <sourceUris>
+        <uri index="0" path="file:///homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/com.teracloud.streams.s2t.sample/RealtimeTranscriber.spl"/>
+        <uri index="1" path="file:///homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/../../../com.teracloud.streams.s2t/com.teracloud.streams.s2t/AudioStreamSource.spl"/>
+        <uri index="2" path="file:///homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/../../../com.teracloud.streams.s2t/com.teracloud.streams.s2t/WenetSpeechToText.spl"/>
+        <uri index="3" path="file:///homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT/../../../com.teracloud.streams.s2t/com.teracloud.streams.s2t/WebSocketSink.spl"/>
+      </sourceUris>
+      <compositeOperDefinitions>
+        <compositeOperDefinition endLine="118" index="0" kind="com.teracloud.streams.s2t.sample::RealtimeTranscriber" numberOfInputPorts="0" numberOfOutputPorts="0" sourceIndex="0" startLine="19" toolkitIndex="0">
+          <description>com.teracloud.streams.s2t.sample::RealtimeTranscriber Composite</description>
+        </compositeOperDefinition>
+        <compositeOperDefinition endLine="60" index="1" kind="com.teracloud.streams.s2t::AudioStreamSource" numberOfInputPorts="0" numberOfOutputPorts="1" sourceIndex="1" startLine="33" toolkitIndex="2">
+          <description>com.teracloud.streams.s2t::AudioStreamSource Composite</description>
+        </compositeOperDefinition>
+        <compositeOperDefinition endLine="44" index="2" kind="com.teracloud.streams.s2t::WenetSpeechToText" numberOfInputPorts="1" numberOfOutputPorts="1" sourceIndex="2" startLine="23" toolkitIndex="2">
+          <description>com.teracloud.streams.s2t::WenetSpeechToText Composite</description>
+        </compositeOperDefinition>
+        <compositeOperDefinition endLine="32" index="3" kind="com.teracloud.streams.s2t::WebSocketSink" numberOfInputPorts="1" numberOfOutputPorts="0" sourceIndex="3" startLine="16" toolkitIndex="2">
+          <description>com.teracloud.streams.s2t::WebSocketSink Composite</description>
+        </compositeOperDefinition>
+      </compositeOperDefinitions>
+      <compositeOperInstances>
+        <compositeOperInstance definitionIndex="0" endLine="118" index="6" name="com.teracloud.streams.s2t.sample::RealtimeTranscriber" sourceIndex="0" startLine="19">
+          <compositeOperInstance definitionIndex="1" endLine="34" index="7" name="AudioStream" sourceIndex="0" startLine="27">
+            <outputPorts>
+              <port index="0">
+                <incomingConnections>
+                  <connection operIndex="3" operName="AudioStream.AudioStream" portIndex="0" portKind="output"/>
+                </incomingConnections>
+                <outgoingConnections>
+                  <connection operIndex="8" operName="TranscriptionStream" portIndex="0" portKind="input"/>
+                </outgoingConnections>
+              </port>
+            </outputPorts>
+            <primitiveOperInstance definitionIndex="0" endLine="59" index="3" name="AudioStream.AudioStream" optimized="true" relocatable="true" restartable="true" singleThreadedOnOutputs="true" sourceIndex="1" startLine="49">
+              <outputPorts>
+                <port encoding="LE" index="0" isMutable="false" name="AudioStream" streamName="AudioStream" transport="TCP" tupleTypeIndex="0" viewable="true">
+                  <connections>
+                    <connection operIndex="7" operName="AudioStream" portIndex="0" portKind="output"/>
+                  </connections>
+                </port>
+              </outputPorts>
+              <envVars/>
+              <resources>
+                <poolLocation poolIndex="0"/>
+              </resources>
+              <runtimeConstants>
+                <runtimeConstant name="lit$0" value="0.1"/>
+                <runtimeConstant name="lit$1" value="1000"/>
+                <runtimeConstant name="lit$2" value="[0, 1, 2, 3]"/>
+                <runtimeConstant name="lit$3" value="1000"/>
+              </runtimeConstants>
+              <sharedObject class="AudioStream::AudioStream">
+                <wrapper>none</wrapper>
+                <uri>bin/AudioStream.AudioStream.so</uri>
+              </sharedObject>
+              <tracing level="error"/>
+            </primitiveOperInstance>
+          </compositeOperInstance>
+          <compositeOperInstance definitionIndex="2" endLine="45" index="8" name="TranscriptionStream" sourceIndex="0" startLine="37">
+            <inputPorts>
+              <port index="0">
+                <incomingConnections>
+                  <connection operIndex="7" operName="AudioStream" portIndex="0" portKind="output"/>
+                </incomingConnections>
+                <outgoingConnections>
+                  <connection operIndex="4" operName="TranscriptionStream.TranscriptionStream" portIndex="0" portKind="input"/>
+                </outgoingConnections>
+              </port>
+            </inputPorts>
+            <outputPorts>
+              <port index="0">
+                <incomingConnections>
+                  <connection operIndex="4" operName="TranscriptionStream.TranscriptionStream" portIndex="0" portKind="output"/>
+                </incomingConnections>
+                <outgoingConnections>
+                  <connection operIndex="1" operName="TimestampedTranscription" portIndex="0" portKind="input"/>
+                  <connection operIndex="0" operName="TranscriptionMonitor" portIndex="0" portKind="input"/>
+                </outgoingConnections>
+              </port>
+            </outputPorts>
+            <primitiveOperInstance definitionIndex="1" endLine="43" index="4" name="TranscriptionStream.TranscriptionStream" optimized="true" relocatable="true" restartable="true" singleThreadedOnOutputs="true" sourceIndex="2" startLine="35">
+              <inputPorts>
+                <port encoding="LE" index="0" isMutable="false" name="AudioStream" transport="TCP" tupleTypeIndex="0">
+                  <connections>
+                    <connection operIndex="8" operName="TranscriptionStream" portIndex="0" portKind="input"/>
+                  </connections>
+                </port>
+              </inputPorts>
+              <outputPorts>
+                <port encoding="LE" index="0" isMutable="true" name="TranscriptionStream" streamName="TranscriptionStream" transport="TCP" tupleTypeIndex="1" viewable="true">
+                  <connections>
+                    <connection operIndex="8" operName="TranscriptionStream" portIndex="0" portKind="output"/>
+                  </connections>
+                </port>
+              </outputPorts>
+              <envVars/>
+              <resources>
+                <poolLocation poolIndex="0"/>
+              </resources>
+              <runtimeConstants>
+                <runtimeConstant name="lit$0" submissionTimeValueIndex="0" value="&quot;&quot;"/>
+              </runtimeConstants>
+              <sharedObject class="TranscriptionStream::TranscriptionStream">
+                <wrapper>none</wrapper>
+                <uri>bin/TranscriptionStream.TranscriptionStream.so</uri>
+              </sharedObject>
+              <tracing level="error"/>
+            </primitiveOperInstance>
+          </compositeOperInstance>
+          <compositeOperInstance definitionIndex="3" endLine="107" index="9" name="TranscriptionSink" sourceIndex="0" startLine="103">
+            <inputPorts>
+              <port index="0">
+                <incomingConnections>
+                  <connection operIndex="1" operName="TimestampedTranscription" portIndex="0" portKind="output"/>
+                </incomingConnections>
+                <outgoingConnections>
+                  <connection operIndex="5" operName="TranscriptionSink.Sink" portIndex="0" portKind="input"/>
+                </outgoingConnections>
+              </port>
+            </inputPorts>
+            <primitiveOperInstance definitionIndex="2" endLine="31" index="5" name="TranscriptionSink.Sink" optimized="true" relocatable="true" restartable="true" singleThreadedOnOutputs="true" sourceIndex="3" startLine="26">
+              <inputPorts>
+                <port encoding="LE" index="0" isMutable="false" name="In" transport="TCP" tupleTypeIndex="2">
+                  <connections>
+                    <connection operIndex="9" operName="TranscriptionSink" portIndex="0" portKind="input"/>
+                  </connections>
+                </port>
+              </inputPorts>
+              <envVars/>
+              <resources>
+                <poolLocation poolIndex="0"/>
+              </resources>
+              <runtimeConstants>
+                <runtimeConstant name="lit$0" value="&quot;websocket_output.txt&quot;"/>
+              </runtimeConstants>
+              <sharedObject class="TranscriptionSink::Sink">
+                <wrapper>none</wrapper>
+                <uri>bin/TranscriptionSink.Sink.so</uri>
+              </sharedObject>
+              <tracing level="error"/>
+            </primitiveOperInstance>
+          </compositeOperInstance>
+          <primitiveOperInstance definitionIndex="3" endLine="86" index="0" name="TranscriptionMonitor" optimized="true" relocatable="true" restartable="true" singleThreadedOnOutputs="true" sourceIndex="0" startLine="48">
+            <splAnnotation internal="true" tag="logicClause">
+              <value key="hasState" type="boolean">true</value>
+              <value key="hasOnProcess" type="boolean">false</value>
+              <value key="hasOnTuple" type="boolean">true</value>
+              <value key="hasOnPunct" type="boolean">false</value>
+            </splAnnotation>
+            <inputPorts>
+              <port encoding="LE" index="0" isControl="true" isMutable="false" name="In" transport="TCP" tupleTypeIndex="1">
+                <connections>
+                  <connection operIndex="8" operName="TranscriptionStream" portIndex="0" portKind="output"/>
+                </connections>
+              </port>
+            </inputPorts>
+            <envVars/>
+            <resources>
+              <poolLocation poolIndex="0"/>
+            </resources>
+            <runtimeConstants>
+              <runtimeConstant name="lit$0" value="1"/>
+              <runtimeConstant name="lit$1" value="10"/>
+              <runtimeConstant name="lit$2" value="&quot;--- Transcription Metrics ---&quot;"/>
+              <runtimeConstant name="lit$3" value="&quot;Total results: &quot;"/>
+              <runtimeConstant name="lit$4" value="&quot;Final results: &quot;"/>
+              <runtimeConstant name="lit$5" value="&quot;Partial results: &quot;"/>
+              <runtimeConstant name="lit$6" value="&quot;Average confidence: &quot;"/>
+              <runtimeConstant name="lit$7" value="&quot;Total characters: &quot;"/>
+              <runtimeConstant name="lit$8" value="&quot;----------------------------&quot;"/>
+              <runtimeConstant name="lit$9" value="0"/>
+              <runtimeConstant name="lit$10" value="0"/>
+              <runtimeConstant name="lit$11" value="0"/>
+              <runtimeConstant name="lit$12" value="0"/>
+              <runtimeConstant name="lit$13" value="0"/>
+            </runtimeConstants>
+            <sharedObject class="TranscriptionMonitor">
+              <wrapper>none</wrapper>
+              <uri>bin/TranscriptionMonitor.so</uri>
+            </sharedObject>
+            <tracing level="error"/>
+          </primitiveOperInstance>
+          <primitiveOperInstance definitionIndex="3" endLine="100" index="1" name="TimestampedTranscription" optimized="true" relocatable="true" restartable="true" singleThreadedOnOutputs="true" sourceIndex="0" startLine="89">
+            <splAnnotation internal="true" tag="logicClause">
+              <value key="hasState" type="boolean">false</value>
+              <value key="hasOnProcess" type="boolean">false</value>
+              <value key="hasOnTuple" type="boolean">true</value>
+              <value key="hasOnPunct" type="boolean">false</value>
+            </splAnnotation>
+            <inputPorts>
+              <port encoding="LE" index="0" isMutable="true" name="In" transport="TCP" tupleTypeIndex="1">
+                <connections>
+                  <connection operIndex="8" operName="TranscriptionStream" portIndex="0" portKind="output"/>
+                </connections>
+              </port>
+            </inputPorts>
+            <outputPorts>
+              <port encoding="LE" index="0" isMutable="true" name="TimestampedTranscription" streamName="TimestampedTranscription" transport="TCP" tupleTypeIndex="2" viewable="true">
+                <connections>
+                  <connection operIndex="2" operName="FileOutput" portIndex="0" portKind="input"/>
+                  <connection operIndex="9" operName="TranscriptionSink" portIndex="0" portKind="input"/>
+                </connections>
+              </port>
+            </outputPorts>
+            <envVars/>
+            <resources>
+              <poolLocation poolIndex="0"/>
+            </resources>
+            <runtimeConstants>
+              <runtimeConstant name="lit$0" value="1000"/>
+              <runtimeConstant name="lit$1" value="0"/>
+            </runtimeConstants>
+            <sharedObject class="TimestampedTranscription">
+              <wrapper>none</wrapper>
+              <uri>bin/TimestampedTranscription.so</uri>
+            </sharedObject>
+            <tracing level="error"/>
+          </primitiveOperInstance>
+          <primitiveOperInstance definitionIndex="2" endLine="117" index="2" name="FileOutput" optimized="true" relocatable="true" restartable="true" singleThreadedOnOutputs="true" sourceIndex="0" startLine="110">
+            <inputPorts>
+              <port encoding="LE" index="0" isMutable="false" name="TimestampedTranscription" transport="TCP" tupleTypeIndex="2">
+                <connections>
+                  <connection operIndex="1" operName="TimestampedTranscription" portIndex="0" portKind="output"/>
+                </connections>
+              </port>
+            </inputPorts>
+            <envVars/>
+            <resources>
+              <poolLocation poolIndex="0"/>
+            </resources>
+            <runtimeConstants>
+              <runtimeConstant name="lit$0" value="&quot;transcription_results.csv&quot;"/>
+              <runtimeConstant name="lit$1" value="1"/>
+            </runtimeConstants>
+            <sharedObject class="FileOutput">
+              <wrapper>none</wrapper>
+              <uri>bin/FileOutput.so</uri>
+            </sharedObject>
+            <tracing level="error"/>
+          </primitiveOperInstance>
+        </compositeOperInstance>
+      </compositeOperInstances>
+    </composites>
+    <toolkits>
+      <toolkit index="0" name="RealtimeTranscriber" uri="file:///homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/CppWeNet_STT" version="1.0.0"/>
+      <toolkit index="1" name="spl" uri="file:///homes/jsharpe/teracloud/streams/7.2.0.0/toolkits/spl" version="1.4.0"/>
+      <toolkit index="2" name="com.teracloud.streams.s2t" uri="file:///homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t" version="1.0.0"/>
+    </toolkits>
+    <customMetrics>
+      <customMetric index="0" kind="Counter" name="nFilesOpened">
+        <description>The number of files opened by the `FileSink` operator.</description>
+      </customMetric>
+      <customMetric index="1" kind="Counter" name="nTupleWriteErrors">
+        <description>
+ The number of tuple writes that had an error on the file stream after the write completed. 
+Due to buffering, write failures might not be detected immediately. 
+You can use `param flush : 1u;` to ensure quicker detection, but with a (possibly large) performance penalty. 
+After a failure is detected, all future writes fail unless the error condition is cleared or the file is closed. 
+
+For more information, see the **writeFailureAction** parameter.
+</description>
+      </customMetric>
+    </customMetrics>
+    <submissionTimeValues>
+      <submissionTimeValue compositeName="com.teracloud.streams.s2t.sample::RealtimeTranscriber" index="0" kind="named" name="modelPath" required="true"/>
+    </submissionTimeValues>
+  </splApplication>
+</applicationSet>

@@ -1,0 +1,4 @@
+	@$(CXX_LN) $(SPL_CXXFLAGS) -o bin/TimestampedTranscription.so -fPIC -shared $(SOTimestampedTranscription) $(SPL_LDFLAGS)\
+	    build/operator/TimestampedTranscription.o \
+	    build/type/BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl.o \
+	    build/type/BTxPHLH1IescpAMA6xZAxJpwE2p0IwWuwyxdeIjIAwrgLhR3ZkaPkKt67FUGqkFYaAxM3oO1cdawwoOqmPtVDDg.o 

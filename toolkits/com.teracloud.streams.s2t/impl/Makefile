@@ -7,10 +7,10 @@ TOOLKIT_DIR := ..
 include Makefile.common
 
 # Source files
-SOURCES = include/WenetONNXImpl.cpp
+SOURCES = include/OnnxSTTImpl.cpp include/OnnxSTTWrapper.cpp include/WenetSTTImpl.cpp include/WenetSTTWrapper.cpp
 
 # Target library
-LIB = libwenetonnx.so
+LIB = libs2t_impl.so
 
 # Compiler flags
 CXXFLAGS += -fPIC -std=c++14 -Wall -Wextra

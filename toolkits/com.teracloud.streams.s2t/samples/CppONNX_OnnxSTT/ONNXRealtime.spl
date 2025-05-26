@@ -1,0 +1,81 @@
+use com.teracloud.streams.s2t::*;
+
+/**
+ * Real-time speech recognition using the ONNX-based C++ operator
+ * 
+ * This demonstrates the OnnxSTT operator which provides:
+ * - C++ performance (low latency)
+ * - ONNX portability (no WeNet C API dependency)
+ * - Easy model updates (just replace ONNX file)
+ */
+composite ONNXRealtime {
+    param
+        expression<rstring> $modelDir : "../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20";
+        
+    graph
+        // Audio source - reads real WAV files from test data
+        stream<blob audio, uint64 audioTimestamp> AudioStream = AudioStreamSource() {
+            param
+                audioFile: "../../test_data/audio/0.wav";
+                chunkSizeMs: 100;
+                sampleRate: 16000;
+                format: "wav";
+        }
+        
+        // ONNX-based speech recognition
+        stream<rstring text, boolean isFinal, float64 confidence, 
+                uint64 audioTimestamp, uint64 latencyMs> 
+            Transcription = OnnxSTT(AudioStream) {
+            param
+                encoderModel: $modelDir + "/wenet_encoder.onnx";
+                vocabFile: $modelDir + "/vocab.txt";
+                cmvnFile: $modelDir + "/global_cmvn.stats";
+                sampleRate: 16000;
+                chunkSizeMs: 100;
+                provider: "CPU";  // or "CUDA" for GPU
+                numThreads: 4;
+        }
+        
+        // Display results with performance info
+        () as ResultDisplay = Custom(Transcription) {
+            logic
+                state: {
+                    mutable uint64 resultCount = 0ul;
+                    mutable uint64 totalLatency = 0ul;
+                    mutable uint64 minLatency = 999999ul;
+                    mutable uint64 maxLatency = 0ul;
+                }
+                
+                onTuple Transcription: {
+                    // Display transcription
+                    printStringLn("[" + (rstring)latencyMs + "ms] " + 
+                                 text + 
+                                 (isFinal ? " (FINAL)" : " ...") +
+                                 " [conf: " + (rstring)(confidence * 100.0) + "%]");
+                    
+                    // Update statistics
+                    resultCount++;
+                    totalLatency += latencyMs;
+                    if (latencyMs < minLatency) minLatency = latencyMs;
+                    if (latencyMs > maxLatency) maxLatency = latencyMs;
+                    
+                    // Show performance summary every 10 results
+                    if (resultCount % 10ul == 0ul) {
+                        printStringLn("\n=== ONNX C++ Performance ===");
+                        printStringLn("Results: " + (rstring)resultCount);
+                        printStringLn("Average: " + (rstring)(totalLatency/resultCount) + "ms");
+                        printStringLn("Min: " + (rstring)minLatency + "ms");
+                        printStringLn("Max: " + (rstring)maxLatency + "ms");
+                        printStringLn("Target: <150ms for C++ ONNX\n");
+                    }
+                }
+        }
+        
+        // Also write to file for analysis
+        () as FileWriter = FileSink(Transcription) {
+            param
+                file: "onnx_transcription_results.csv";
+                format: csv;
+                quoteStrings: true;
+        }
+}

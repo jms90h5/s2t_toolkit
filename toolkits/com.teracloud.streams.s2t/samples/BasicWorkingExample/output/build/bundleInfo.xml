@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<bundleInfoModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/bundleInfoModel" adlFile="BasicDemo.adl" applicationDirectory="BasicWorkingExample" buildDate="" buildId="" bundleVersion="7200" executionMode="distributed" outputDirectory="output" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <toolkit compileRoot="/homes/jsharpe/teracloud/streams/7.2.0.0/toolkits/spl" name="spl" version="1.4.0">
+    <file name="impl/bin/PythonOp_vmpath.sh"/>
+    <file name="doc/en_US/spldoc/html/commonltr.css"/>
+    <file name="toolkit.xml"/>
+  </toolkit>
+  <toolkit compileRoot="/homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/samples/BasicWorkingExample" name="BasicWorkingExample" version="1.0.0">
+    <file name="toolkit.xml"/>
+  </toolkit>
+</bundleInfoModel>

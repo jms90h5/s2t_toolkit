@@ -1,0 +1,1 @@
+-I /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/impl/include -I /homes/jsharpe/teracloud/toolkits/com.teracloud.streams.s2t/deps/onnxruntime/include 

@@ -1,0 +1,3 @@
+	@$(CXX_LN) $(SPL_CXXFLAGS) -o bin/TranscriptionMonitor.so -fPIC -shared $(SOTranscriptionMonitor) $(SPL_LDFLAGS)\
+	    build/operator/TranscriptionMonitor.o \
+	    build/type/BtGOTOmseHBDBZJkUONJc5FWBP94nOE83XLB_00bk_0KP375_01XppZSWMm1tUBFbC2tuDNWD2HS_1q5gZGoogBKyDl.o 

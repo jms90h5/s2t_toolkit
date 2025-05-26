@@ -1,6 +1,6 @@
-# WeNet Speech-to-Text Toolkit Samples
+# Speech-to-Text Toolkit Samples
 
-This directory contains sample applications demonstrating different approaches to implementing real-time speech-to-text using the WeNet toolkit with TeraCloud Streams.
+This directory contains sample applications demonstrating different approaches to implementing real-time speech-to-text using the TeraCloud Streams Speech-to-Text toolkit.
 
 ## Sample Applications
 
@@ -9,22 +9,26 @@ This directory contains sample applications demonstrating different approaches t
 #### PythonONNX_MultiOperator
 - **Technology**: Python with ONNX Runtime (multi-operator approach)
 - **Operator**: Custom Python operators
+- **Dependencies**: Requires `com.teracloud.streams.python` and `com.teracloud.streams.onnx` toolkits
 - **Use Case**: Research and prototyping where component flexibility is needed
 - **Latency**: ~200-300ms
 - **Key Features**: Separate operators for feature extraction, encoding, and decoding
+- **Status**: Reference implementation (requires additional toolkits)
 
 #### PythonONNX_SingleOperator
 - **Technology**: Python with embedded ONNX Runtime (single operator)
 - **Operator**: Custom Python operator with all processing embedded
+- **Dependencies**: Requires `com.teracloud.streams.python` toolkit
 - **Use Case**: Production scenarios where Python is acceptable
 - **Latency**: ~150-200ms
 - **Key Features**: Better performance through reduced inter-operator communication
+- **Status**: Reference implementation (requires additional toolkits)
 
 ### C++-based Implementations
 
-#### CppONNX_WenetONNX
+#### CppONNX_OnnxSTT
 - **Technology**: Pure C++ with ONNX Runtime
-- **Operator**: `WenetONNX` (toolkit primitive operator)
+- **Operator**: `OnnxSTT` (toolkit primitive operator)
 - **Use Case**: Production real-time systems requiring low latency
 - **Latency**: ~100-150ms
 - **Key Features**:
@@ -32,7 +36,7 @@ This directory contains sample applications demonstrating different approaches t
   - Supports CPU/CUDA/TensorRT providers
   - Self-contained deployment (no WeNet runtime needed)
 
-#### CppWeNet_WenetSTT
+#### CppWeNet_STT
 - **Technology**: C++ with full WeNet runtime
 - **Operator**: `WenetSTT` (toolkit primitive operator)
 - **Use Case**: Applications requiring full WeNet features
@@ -50,7 +54,7 @@ This directory contains sample applications demonstrating different approaches t
 - Latency requirements are moderate (150-300ms)
 - Development speed is prioritized
 
-### Use CppONNX_WenetONNX when:
+### Use CppONNX_OnnxSTT when:
 - Low latency is critical (<150ms)
 - Deployment simplicity is important
 - Cross-platform compatibility is needed
@@ -67,20 +71,64 @@ This directory contains sample applications demonstrating different approaches t
 See the `docs/` directory for design guides and best practices:
 - **RealtimeDesignGuide**: Explains why batching is inappropriate for real-time STT
 
+## Self-Contained Design
+
+All samples are now **self-contained** within the toolkit directory:
+
+- **Models**: Located in `../models/` relative to samples
+- **Test Data**: Located in `../test_data/audio/` 
+- **No External Dependencies**: All required models and test audio files are included
+
+### Available Test Data
+- Real audio files (WAV format) for testing
+- WeNet model with real CMVN statistics  
+- ONNX models for CPU/GPU acceleration
+
+### Sample Applications (Updated)
+
+#### BasicWorkingExample
+- **BasicDemo.spl**: Simple demonstration with mock data
+- **TestAudioDemo.spl**: Uses real test audio files from `test_data/`
+- **Purpose**: Verify toolkit installation and basic functionality
+
 ## Building and Running Samples
+
+### Prerequisites
+
+Before building any samples, ensure your Streams environment is properly configured:
+
+```bash
+# Source the Streams environment
+source ~/teracloud/streams/7.2.0.0/bin/streamsprofile.sh
+
+# Verify environment
+echo $STREAMS_INSTALL
+```
+
+### Building Samples
 
 Each sample directory contains:
 - `README.md`: Specific instructions for that sample
 - `Makefile`: Build configuration
 - `*.spl`: Streams application source
 
-General build pattern:
+#### Ready-to-Build Samples (C++)
 ```bash
-cd <sample_directory>
+# Build the ONNX C++ sample (recommended)
+cd CppONNX_OnnxSTT
+make
+
+# Build the WeNet C++ sample  
+cd CppWeNet_WenetSTT
 make
 ```
 
-Run pattern:
+#### Reference Samples (Python)
+The Python samples require additional toolkits and are provided as reference implementations:
+- `PythonONNX_MultiOperator`: Requires `com.teracloud.streams.python` and `com.teracloud.streams.onnx`
+- `PythonONNX_SingleOperator`: Requires `com.teracloud.streams.python`
+
+### Running Samples
 ```bash
 streamtool submitjob output/<app_name>.sab
 ```

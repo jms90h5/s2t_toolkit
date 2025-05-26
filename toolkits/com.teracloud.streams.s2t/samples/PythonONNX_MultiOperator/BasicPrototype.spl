@@ -13,14 +13,14 @@ use com.teracloud.streams.onnx::ONNXInference;
  */
 composite BasicPythonPrototype {
     param
-        expression<rstring> $modelPath : "./models";
+        expression<rstring> $modelPath : "../../models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20";
         expression<int32> $sampleRate : 16000;
         
     graph
-        // Audio source
+        // Audio source - using real test audio data
         stream<blob audio, uint64 timestamp> AudioStream = FileSource() {
             param
-                file: "test_audio.wav";
+                file: "../../test_data/audio/3.wav";
                 format: binary;
                 parsing: fast;
         }

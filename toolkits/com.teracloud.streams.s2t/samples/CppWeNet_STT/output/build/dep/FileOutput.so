@@ -1,0 +1,5 @@
+	@$(CXX_LN) $(SPL_CXXFLAGS) -o bin/FileOutput.so -fPIC -shared $(SOFileOutput) -lstreams-stdtk-runtime $(SPL_LDFLAGS)\
+	    build/operator/FileOutput.o \
+	    build/type/BEgoJ0po0GtM2yrcYCdUueq_0x37P_0TgGZrLtqFnIVksAYOU0HiLmCCg9YDl_1Ifrq1sXNnn0FPmSzdGzgMuSZwD_1.o \
+	    build/type/BuoCzre0fg5iJdQnrwapkCyjYEMMfTagKrJ53r_0jmfdVfmhf4hwant6OIuyi_14dk4y_0FAB2rdBfcbFQiN6Jd_0An.o \
+	    build/type/BTxPHLH1IescpAMA6xZAxJpwE2p0IwWuwyxdeIjIAwrgLhR3ZkaPkKt67FUGqkFYaAxM3oO1cdawwoOqmPtVDDg.o 

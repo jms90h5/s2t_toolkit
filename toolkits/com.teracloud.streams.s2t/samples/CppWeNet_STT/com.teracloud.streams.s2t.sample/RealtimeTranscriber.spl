@@ -1,0 +1,118 @@
+namespace com.teracloud.streams.s2t.sample;
+
+use com.teracloud.streams.s2t::*;
+
+/**
+ * RealtimeTranscriber - Sample application for real-time speech-to-text with WeNet.
+ * 
+ * This sample demonstrates how to set up a complete real-time speech recognition system
+ * using WeNet. It includes:
+ *   - Audio input from a streaming source
+ *   - Real-time transcription with incremental results
+ *   - WebSocket output for visualization
+ *   - Live monitoring with metrics
+ * 
+ * @param modelPath: Path to the WeNet model directory
+ * @param audioEndpoint: WebSocket URL or endpoint to receive audio from
+ * @param outputEndpoint: WebSocket URL to send transcription results to
+ */
+public composite RealtimeTranscriber {
+    param
+        expression<rstring> $modelPath: getSubmissionTimeValue("modelPath", "../../models/wenet_model");
+        expression<rstring> $audioEndpoint: getSubmissionTimeValue("audioEndpoint", "ws://audio-source:9000/stream");
+        expression<rstring> $outputEndpoint: getSubmissionTimeValue("outputEndpoint", "ws://localhost:8080/transcription");
+        
+    graph
+        // Stream of audio chunks from a WebSocket source
+        stream<blob audioChunk, uint64 audioTimestamp> AudioStream = AudioStreamSource() {
+            param
+                endpoint: $audioEndpoint;
+                format: "pcm";
+                sampleRate: 16000;
+                channelCount: 1;
+                chunkSize: 100; // 100ms chunks
+        }
+        
+        // Real-time transcription with WeNet
+        stream<rstring text, boolean isFinal, float64 confidence> TranscriptionStream = 
+            WenetSpeechToText(AudioStream) {
+            param
+                modelPath: $modelPath;
+                sampleRate: 16000;
+                chunkSize: 16;
+                nbest: 1;
+                numThreads: 4;
+        }
+        
+        // Monitor the transcription process with custom metrics
+        () as TranscriptionMonitor = Custom(TranscriptionStream as In) {
+            logic
+                state: {
+                    mutable int32 totalResults = 0;
+                    mutable int32 finalResults = 0;
+                    mutable int32 partialResults = 0;
+                    mutable float64 avgConfidence = 0.0;
+                    mutable int32 charCount = 0;
+                    mutable float64 lastLogTime = getTimestampInSecs();
+                }
+                
+                onTuple In: {
+                    // Update metrics
+                    totalResults++;
+                    if (In.isFinal) {
+                        finalResults++;
+                    } else {
+                        partialResults++;
+                    }
+                    
+                    // Track confidence and character count
+                    avgConfidence = ((avgConfidence * (float64)(totalResults - 1)) + In.confidence) / (float64)totalResults;
+                    charCount += length(In.text);
+                    
+                    // Log metrics every 10 seconds
+                    float64 now = getTimestampInSecs();
+                    if (now - lastLogTime >= 10.0) {
+                        printStringLn("--- Transcription Metrics ---");
+                        printStringLn("Total results: " + (rstring)totalResults);
+                        printStringLn("Final results: " + (rstring)finalResults);
+                        printStringLn("Partial results: " + (rstring)partialResults);
+                        printStringLn("Average confidence: " + (rstring)avgConfidence);
+                        printStringLn("Total characters: " + (rstring)charCount);
+                        printStringLn("----------------------------");
+                        
+                        lastLogTime = now;
+                    }
+                }
+        }
+        
+        // Add timestamp to each transcription result
+        stream<rstring transcription, float64 confidence, uint64 audioTimestamp> TimestampedTranscription = 
+            Custom(TranscriptionStream as In) {
+            logic
+                onTuple In: {
+                    // Add current timestamp
+                    submit({
+                        transcription = In.text,
+                        confidence = In.confidence,
+                        audioTimestamp = (uint64)(getTimestampInSecs() * 1000.0)
+                    }, TimestampedTranscription);
+                }
+        }
+        
+        // Send transcription results to WebSocket for visualization
+        () as TranscriptionSink = WebSocketSink(TimestampedTranscription) {
+            param
+                websocketUrl: $outputEndpoint;
+                format: "json";
+        }
+        
+        // Save final transcription results to file
+        () as FileOutput = FileSink(TimestampedTranscription) {
+            param
+                file: "transcription_results.csv";
+                format: csv;
+                flush: 1u;
+                writePunctuations: false;
+                closeMode: punct; // Close on final punctuation
+        }
+}

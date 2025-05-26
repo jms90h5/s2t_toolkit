@@ -6,15 +6,14 @@ This toolkit provides integration with the WeNet speech recognition framework,
 enabling real-time streaming speech-to-text capabilities for TeraCloud Streams applications.
     </description>
     <uriTable>
-      <uri index="6" value="com.teracloud.streams.s2t/WenetONNX"/>
-      <uri index="4" value="com.teracloud.streams.s2t/WenetRealtimeSTT.spl"/>
-      <uri index="5" value="com.teracloud.streams.s2t/WenetSTT"/>
-      <uri index="3" value="com.teracloud.streams.s2t/WebSocketSink.spl"/>
-      <uri index="2" value="com.teracloud.streams.s2t/WenetSpeechToText.spl"/>
+      <uri index="5" value="com.teracloud.streams.s2t/OnnxSTT"/>
+      <uri index="4" value="com.teracloud.streams.s2t/WenetSTT"/>
+      <uri index="3" value="com.teracloud.streams.s2t/WenetSpeechToText.spl"/>
+      <uri index="2" value="com.teracloud.streams.s2t/WebSocketSink.spl"/>
       <uri index="1" value="com.teracloud.streams.s2t/AudioStreamSource.spl"/>
     </uriTable>
     <namespace name="com.teracloud.streams.s2t">
-      <primitiveOp language="Cpp" modelUriIndex="5" name="WenetSTT" public="true">
+      <primitiveOp language="Cpp" modelUriIndex="4" name="WenetSTT" public="true">
         <description>
         The WenetSTT operator provides real-time speech-to-text transcription using the WeNet toolkit.
         It processes streaming audio data and outputs transcription results with support for partial
@@ -26,23 +25,14 @@ enabling real-time streaming speech-to-text capabilities for TeraCloud Streams a
         <parameter expressionMode="AttributeFree" name="sampleRate" optional="true" type="int32">
           <description>Sample rate of input audio (default 16000)</description>
         </parameter>
-        <parameter expressionMode="AttributeFree" name="enablePartialResults" optional="true" type="boolean">
-          <description>Enable partial transcription results</description>
+        <parameter expressionMode="AttributeFree" name="chunkSize" optional="true" type="int32">
+          <description>Chunk size for processing (default 16)</description>
         </parameter>
-        <parameter expressionMode="AttributeFree" name="enableEndpoint" optional="true" type="boolean">
-          <description>Enable endpoint detection</description>
+        <parameter expressionMode="AttributeFree" name="nbest" optional="true" type="int32">
+          <description>Number of best results to return (default 1)</description>
         </parameter>
-        <parameter expressionMode="AttributeFree" name="maxChunkWaitTime" optional="true" type="float64">
-          <description>Maximum wait time for audio chunks in seconds</description>
-        </parameter>
-        <parameter expressionMode="AttributeFree" name="silenceThreshold" optional="true" type="float64">
-          <description>Silence detection threshold</description>
-        </parameter>
-        <parameter expressionMode="AttributeFree" name="enableVAD" optional="true" type="boolean">
-          <description>Enable voice activity detection</description>
-        </parameter>
-        <parameter expressionMode="AttributeFree" name="chunkMs" optional="true" type="int32">
-          <description>Chunk size in milliseconds</description>
+        <parameter expressionMode="AttributeFree" name="numThreads" optional="true" type="int32">
+          <description>Number of threads for processing (default 1)</description>
         </parameter>
         <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
           <description>Audio input stream</description>
@@ -52,11 +42,11 @@ enabling real-time streaming speech-to-text capabilities for TeraCloud Streams a
           <description>Transcription output stream</description>
         </outputPort>
       </primitiveOp>
-      <primitiveOp language="Cpp" modelUriIndex="6" name="WenetONNX" public="true">
+      <primitiveOp language="Cpp" modelUriIndex="5" name="OnnxSTT" public="true">
         <description>
-        WeNet Speech-to-Text operator using ONNX Runtime.
-        This operator provides real-time speech recognition using WeNet models
-        exported to ONNX format, eliminating the dependency on WeNet C API.
+        ONNX-based Speech-to-Text operator using ONNX Runtime.
+        This operator provides real-time speech recognition using speech models
+        in ONNX format, with no dependency on WeNet C++ API.
       </description>
         <customLiterals name="Provider">
           <value name="CPU"/>
@@ -92,7 +82,7 @@ enabling real-time streaming speech-to-text capabilities for TeraCloud Streams a
           <description>Transcription output stream</description>
         </outputPort>
       </primitiveOp>
-      <compositeOp column="18" line="19" name="AudioStreamSource" potentialMain="false" public="true" uriIndex="1">
+      <compositeOp column="18" line="33" name="AudioStreamSource" potentialMain="false" public="true" uriIndex="1">
         <parameter metaType="Expression" name="endpoint" optional="false" type="&lt;rstring>"/>
         <parameter defaultValue="&quot;pcm&quot;" metaType="Expression" name="format" optional="true" type="&lt;rstring>"/>
         <parameter defaultValue="16000" metaType="Expression" name="sampleRate" optional="true" type="&lt;int32>"/>
@@ -101,35 +91,23 @@ enabling real-time streaming speech-to-text capabilities for TeraCloud Streams a
         <parameter defaultValue="true" metaType="Expression" name="reconnect" optional="true" type="&lt;boolean>"/>
         <parameter defaultValue="5.0" metaType="Expression" name="reconnectInterval" optional="true" type="&lt;float64>"/>
         <outputPort name="AudioStream" portIndex="0"/>
-        <type column="10" line="29" name="AudioStream" type="tuple&lt;blob audioChunk, uint64 audioTimestamp>" uriIndex="1"/>
+        <type column="9" line="44" name="AudioStreamType" type="tuple&lt;blob audioChunk, uint64 audioTimestamp>" uriIndex="1"/>
       </compositeOp>
-      <compositeOp column="18" line="23" name="WenetSpeechToText" potentialMain="false" public="true" uriIndex="2">
-        <parameter metaType="Expression" name="modelPath" optional="false" type="&lt;rstring>"/>
-        <parameter defaultValue="16000" metaType="Expression" name="sampleRate" optional="true" type="&lt;int32>"/>
-        <parameter defaultValue="true" metaType="Expression" name="partialResultsEnabled" optional="true" type="&lt;boolean>"/>
-        <parameter defaultValue="0.3" metaType="Expression" name="maxLatency" optional="true" type="&lt;float64>"/>
-        <parameter defaultValue="true" metaType="Expression" name="vad" optional="true" type="&lt;boolean>"/>
-        <parameter defaultValue="-40.0" metaType="Expression" name="vadSilenceThreshold" optional="true" type="&lt;float64>"/>
-        <parameter defaultValue="-10.0" metaType="Expression" name="vadSpeechThreshold" optional="true" type="&lt;float64>"/>
-        <parameter defaultValue="3.0" metaType="Expression" name="maxChunkDuration" optional="true" type="&lt;float64>"/>
-        <inputPort name="AudioStream" portIndex="0"/>
-        <outputPort name="TranscriptionStream" portIndex="0"/>
-      </compositeOp>
-      <compositeOp column="18" line="16" name="WebSocketSink" potentialMain="false" public="true" uriIndex="3">
+      <compositeOp column="18" line="16" name="WebSocketSink" potentialMain="false" public="true" uriIndex="2">
         <parameter metaType="Expression" name="websocketUrl" optional="false" type="&lt;rstring>"/>
         <parameter defaultValue="&quot;json&quot;" metaType="Expression" name="format" optional="true" type="&lt;rstring>"/>
         <parameter defaultValue="true" metaType="Expression" name="reconnect" optional="true" type="&lt;boolean>"/>
         <parameter defaultValue="5.0" metaType="Expression" name="reconnectInterval" optional="true" type="&lt;float64>"/>
-        <inputPort name="In" portIndex="0"/>
+        <inputPort name="In" portIndex="0" type="stream&lt;tuple&lt;rstring transcription, float64 confidence, uint64 audioTimestamp>>"/>
       </compositeOp>
-      <compositeOp column="18" line="16" name="WenetRealtimeSTT" potentialMain="false" public="true" uriIndex="4">
+      <compositeOp column="18" line="23" name="WenetSpeechToText" potentialMain="false" public="true" uriIndex="3">
         <parameter metaType="Expression" name="modelPath" optional="false" type="&lt;rstring>"/>
-        <parameter defaultValue="100" metaType="Expression" name="chunkMs" optional="true" type="&lt;int32>"/>
-        <parameter defaultValue="true" metaType="Expression" name="enablePartial" optional="true" type="&lt;boolean>"/>
-        <parameter defaultValue="500" metaType="Expression" name="vadSilenceMs" optional="true" type="&lt;int32>"/>
         <parameter defaultValue="16000" metaType="Expression" name="sampleRate" optional="true" type="&lt;int32>"/>
-        <inputPort name="AudioIn" portIndex="0" type="stream&lt;blob audio, uint64 audioTimestamp>"/>
-        <outputPort name="TranscriptionOut" portIndex="0" type="stream&lt;rstring text, boolean isFinal, float64 confidence, uint64 audioTimestamp, uint64 latencyMs>"/>
+        <parameter defaultValue="16" metaType="Expression" name="chunkSize" optional="true" type="&lt;int32>"/>
+        <parameter defaultValue="1" metaType="Expression" name="nbest" optional="true" type="&lt;int32>"/>
+        <parameter defaultValue="1" metaType="Expression" name="numThreads" optional="true" type="&lt;int32>"/>
+        <inputPort name="AudioStream" portIndex="0" type="stream&lt;tuple&lt;blob audioChunk, uint64 audioTimestamp>>"/>
+        <outputPort name="TranscriptionStream" portIndex="0" type="stream&lt;tuple&lt;rstring text, boolean isFinal, float64 confidence>>"/>
       </compositeOp>
     </namespace>
     <sabFiles>

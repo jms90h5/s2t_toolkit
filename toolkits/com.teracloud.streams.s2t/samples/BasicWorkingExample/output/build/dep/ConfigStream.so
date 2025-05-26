@@ -1,0 +1,3 @@
+	@$(CXX_LN) $(SPL_CXXFLAGS) -o bin/ConfigStream.so -fPIC -shared $(SOConfigStream) $(SPL_LDFLAGS)\
+	    build/operator/ConfigStream.o \
+	    build/type/Boa4dOIvUbIAmH24J4ofOOwbtyW_1L9R53Tr_1DArFVbZvrKaQaIPwvqDQjHc7MFE_0QstIWFaRo2B5PaWfPHLxQDb.o 

@@ -10,10 +10,11 @@
       </description>
       <libraryDependencies>
         <library>
-          <cmn:description>WeNet C++ Library</cmn:description>
+          <cmn:description>S2T Implementation</cmn:description>
           <cmn:managedLibrary>
-            <cmn:lib>wenetcpp</cmn:lib>
-            <cmn:includePath>../../../impl/include</cmn:includePath>
+            <cmn:lib>s2t_impl</cmn:lib>
+            <cmn:libPath>../../impl</cmn:libPath>
+            <cmn:includePath>../../impl/include</cmn:includePath>
           </cmn:managedLibrary>
         </library>
       </libraryDependencies>
@@ -38,48 +39,24 @@
         <type>int32</type>
       </parameter>
       <parameter>
-        <name>enablePartialResults</name>
-        <description>Enable partial transcription results</description>
+        <name>chunkSize</name>
+        <description>Chunk size for processing (default 16)</description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>AttributeFree</expressionMode>
-        <type>boolean</type>
+        <type>int32</type>
       </parameter>
       <parameter>
-        <name>enableEndpoint</name>
-        <description>Enable endpoint detection</description>
+        <name>nbest</name>
+        <description>Number of best results to return (default 1)</description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>AttributeFree</expressionMode>
-        <type>boolean</type>
+        <type>int32</type>
       </parameter>
       <parameter>
-        <name>maxChunkWaitTime</name>
-        <description>Maximum wait time for audio chunks in seconds</description>
-        <optional>true</optional>
-        <rewriteAllowed>false</rewriteAllowed>
-        <expressionMode>AttributeFree</expressionMode>
-        <type>float64</type>
-      </parameter>
-      <parameter>
-        <name>silenceThreshold</name>
-        <description>Silence detection threshold</description>
-        <optional>true</optional>
-        <rewriteAllowed>false</rewriteAllowed>
-        <expressionMode>AttributeFree</expressionMode>
-        <type>float64</type>
-      </parameter>
-      <parameter>
-        <name>enableVAD</name>
-        <description>Enable voice activity detection</description>
-        <optional>true</optional>
-        <rewriteAllowed>false</rewriteAllowed>
-        <expressionMode>AttributeFree</expressionMode>
-        <type>boolean</type>
-      </parameter>
-      <parameter>
-        <name>chunkMs</name>
-        <description>Chunk size in milliseconds</description>
+        <name>numThreads</name>
+        <description>Number of threads for processing (default 1)</description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>AttributeFree</expressionMode>

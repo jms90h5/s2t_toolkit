@@ -20,28 +20,25 @@ use com.teracloud.streams.s2t::WenetSTT;
  * @param vadSpeechThreshold: Speech threshold for VAD in dB
  * @param maxChunkDuration: Maximum duration of audio chunks to process in seconds
  */
-public composite WenetSpeechToText(input AudioStream; output TranscriptionStream) {
+public composite WenetSpeechToText(
+    input stream<tuple<blob audioChunk, uint64 audioTimestamp>> AudioStream; 
+    output stream<tuple<rstring text, boolean isFinal, float64 confidence>> TranscriptionStream) 
+{
     param
         expression<rstring> $modelPath;
         expression<int32> $sampleRate: 16000;
-        expression<boolean> $partialResultsEnabled: true;
-        expression<float64> $maxLatency: 0.3;
-        expression<boolean> $vad: true;
-        expression<float64> $vadSilenceThreshold: -40.0;
-        expression<float64> $vadSpeechThreshold: -10.0;
-        expression<float64> $maxChunkDuration: 3.0;
+        expression<int32> $chunkSize: 16;
+        expression<int32> $nbest: 1;
+        expression<int32> $numThreads: 1;
     
     graph
-        stream<rstring text, boolean isFinal, float64 confidence> TranscriptionStream = 
+        stream<tuple<rstring text, boolean isFinal, float64 confidence>> TranscriptionStream = 
             WenetSTT(AudioStream) {
             param
                 modelPath: $modelPath;
                 sampleRate: $sampleRate;
-                partialResultsEnabled: $partialResultsEnabled;
-                maxLatency: $maxLatency;
-                vad: $vad;
-                vadSilenceThreshold: $vadSilenceThreshold;
-                vadSpeechThreshold: $vadSpeechThreshold;
-                maxChunkDuration: $maxChunkDuration;
+                chunkSize: $chunkSize;
+                nbest: $nbest;
+                numThreads: $numThreads;
         }
 }

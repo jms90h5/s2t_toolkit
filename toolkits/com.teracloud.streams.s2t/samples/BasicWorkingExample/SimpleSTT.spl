@@ -1,0 +1,43 @@
+// Basic working example - no namespace needed for sample
+
+use com.teracloud.streams.s2t::*;
+
+/**
+ * SimpleSTT - A minimal working example using the WenetSTT operator
+ * 
+ * This demonstrates basic usage without relying on the broken composite operators
+ */
+composite SimpleSTT {
+    param
+        expression<rstring> $modelPath: getSubmissionTimeValue("modelPath", "../../models/wenet_model");
+        
+    graph
+        // Read real audio data from test files
+        stream<blob audio, uint64 audioTs> AudioStream = AudioStreamSource() {
+            param
+                audioFile: "../../test_data/audio/aishell-BAC009S0724W0121.wav";
+                chunkSizeMs: 100;
+                sampleRate: 16000;
+                format: "wav";
+        }
+        
+        // Speech-to-text processing
+        stream<rstring text, boolean isFinal, float64 confidence, 
+               uint64 audioTimestamp, uint64 latencyMs> 
+            Transcription = WenetSTT(AudioStream) {
+            param
+                modelPath: $modelPath;
+                sampleRate: 16000;
+                enablePartialResults: true;
+        }
+        
+        // Display results
+        () as Display = Custom(Transcription) {
+            logic
+                onTuple Transcription: {
+                    printStringLn("Transcription: " + text + 
+                                 (isFinal ? " [FINAL]" : " [partial]") +
+                                 " confidence=" + (rstring)confidence);
+                }
+        }
+}

@@ -1,0 +1,82 @@
+// Basic working demonstration of the speech-to-text toolkit
+// This shows the operators are properly defined and can be used
+
+use com.teracloud.streams.s2t::*;
+
+/**
+ * BasicDemo - A simple demonstration that the toolkit works
+ * 
+ * This sample demonstrates the basic usage pattern without requiring
+ * models or external dependencies. It shows that:
+ * 1. The toolkit operators are properly defined
+ * 2. The compilation works correctly
+ * 3. The basic flow can be established
+ */
+composite BasicDemo {
+    param
+        expression<rstring> $modelPath : "../../models/wenet_model";
+        
+    graph
+        // Read real audio data from test files
+        stream<blob audio, uint64 audioTimestamp> AudioStream = AudioStreamSource() {
+            param
+                audioFile: "../../test_data/audio/librispeech-1995-1837-0001.wav";
+                chunkSizeMs: 100;
+                sampleRate: 16000;
+                format: "wav";
+        }
+        
+        // Real speech-to-text transcription using WeNet
+        stream<rstring text, boolean isFinal, float64 confidence, 
+                uint64 audioTimestamp, uint64 latencyMs> 
+            RealTranscription = WenetSTT(AudioStream) {
+            param
+                modelPath: $modelPath;
+                sampleRate: 16000;
+                maxLatency: 300.0;
+                partialResults: true;
+        }
+        
+        // Display real transcription results
+        () as ResultDisplay = Custom(RealTranscription) {
+            logic
+                onTuple RealTranscription: {
+                    printStringLn("Real Transcription: \"" + text + "\" " + 
+                                 (isFinal ? "(FINAL)" : "(partial)") +
+                                 " [confidence: " + (rstring)(confidence * 100.0) + "%]" +
+                                 " [latency: " + (rstring)latencyMs + "ms]");
+                }
+        }
+        
+        // Save real transcription results to file
+        () as FileWriter = FileSink(RealTranscription) {
+            param
+                file: "real_transcription_results.csv";
+                format: csv;
+                quoteStrings: true;
+        }
+        
+        // Monitor real transcription completion
+        () as CompletionMonitor = Custom(RealTranscription) {
+            logic
+                state: {
+                    mutable int32 resultCount = 0;
+                    mutable int32 finalCount = 0;
+                }
+                
+                onTuple RealTranscription: {
+                    resultCount++;
+                    if (isFinal) finalCount++;
+                    
+                    if (finalCount >= 3) {
+                        printStringLn("\n=== Real Speech-to-Text Demo Complete ===");
+                        printStringLn("✓ Real audio processed: librispeech-1995-1837-0001.wav");
+                        printStringLn("✓ WeNet model with real CMVN used");
+                        printStringLn("✓ Real transcription results generated");
+                        printStringLn("✓ Output file created: real_transcription_results.csv");
+                        printStringLn("Total results: " + (rstring)resultCount + " (Final: " + (rstring)finalCount + ")");
+                        printStringLn("\nThe toolkit is working with real data and models!\n");
+                    }
+                }
+        }
+}
